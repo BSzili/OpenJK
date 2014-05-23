@@ -58,6 +58,10 @@ typedef struct MusicExitPoint_s {
 
 } MusicExitPoint_t;
 
+#if defined(__MORPHOS__) || defined(__amigaos4__)
+#undef _X
+#endif 
+
 struct MusicExitTime_t	// need to declare this way for operator < below
 {
 	float		fTime;

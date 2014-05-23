@@ -2,6 +2,8 @@
 #if _MSC_VER
 # include <float.h>
 # pragma fenv_access (on)
+#elif defined(__amigaos4__)
+#warning How to do this with newlib?
 #else
 # include <fenv.h>
 #endif
@@ -30,13 +32,17 @@ void Sys_SnapVector(float *v)
 	_controlfp_s(&newcontrol, oldcontrol, _MCW_RC);
 #else
 	// pure C99
+#ifndef __amigaos4__
 	int oldround = fegetround();
 	fesetround(FE_TONEAREST);
+#endif
 
 	v[0] = nearbyintf(v[0]);
 	v[1] = nearbyintf(v[1]);
 	v[2] = nearbyintf(v[2]);
 
+#ifndef __amigaos4__
 	fesetround(oldround);
+#endif
 #endif
 }

@@ -17,6 +17,10 @@
 
 #include "../qcommon/q_shared.h"
 
+#if defined(__amigaos4__) || defined(__MORPHOS__)
+#undef _X
+#endif
+
 #define MDXM_IDENT			(('M'<<24)+('G'<<16)+('L'<<8)+'2')
 #define MDXA_IDENT			(('A'<<24)+('G'<<16)+('L'<<8)+'2')
 

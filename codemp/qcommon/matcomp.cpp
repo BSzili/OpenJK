@@ -2,7 +2,11 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+#include <string.h>
+#else
 #include <memory.h>	// for memcpy
+#endif
 
 #define MC_MASK_X ((1<<(MC_BITS_X))-1)
 #define MC_MASK_Y ((1<<(MC_BITS_Y))-1)

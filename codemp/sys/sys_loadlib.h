@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef DEDICATED
+#if defined(DEDICATED) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
 #	ifdef _WIN32
 #		include <windows.h>
 #		define Sys_LoadLibrary(f) (void*)LoadLibrary(f)

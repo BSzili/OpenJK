@@ -152,7 +152,7 @@ decode (standard decoder) reduction_code:
 #include <assert.h>
 
 
-#if !defined(MACOS_X) && !defined(byte) && !defined (__linux__)
+#if !defined(MACOS_X) && !defined(byte) && !defined (__linux__) && !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__) 
 typedef unsigned char byte;
 #endif
 

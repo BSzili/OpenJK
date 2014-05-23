@@ -4,7 +4,7 @@
 ** QGL.H
 */
 
-#if defined( __LINT__ )
+#if defined( __LINT__ ) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
 
 #include <GL/gl.h>
 
@@ -73,7 +73,7 @@
 // TTimo: FIXME
 // linux needs those prototypes
 // GL_VERSION_1_2 is defined after #include <gl.h>
-#if !defined(GL_VERSION_1_2) || defined(__linux__)
+#if !defined(GL_VERSION_1_2) || defined(__linux__) || defined(__amigaos4__)
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1DARBPROC) (GLenum target, GLdouble s);
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1DVARBPROC) (GLenum target, const GLdouble *v);
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1FARBPROC) (GLenum target, GLfloat s);
@@ -349,6 +349,11 @@ extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 #if defined(MACOS_X)
 	// This includes #ifdefs for optional logging and GL error checking after every GL call as well as #defines to prevent incorrect usage of the non-'qgl' versions of the GL API.
 	#include "../macosx/macosx_qgl.h"
+
+#elif defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+
+#include "qgl_linked.h"
+
 #else
 
 // windows systems use a function pointer for each call so we can load minidrivers

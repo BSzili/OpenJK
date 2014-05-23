@@ -191,8 +191,10 @@ cvar_t	*broadsword_dircap=0;
 Ghoul2 Insert End
 */
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 //FIXME: renderer has a copy of this now because stringed is common code and we use it for fonts
 cvar_t *se_language;
+#endif
 
 cvar_t *r_aviMotionJpegQuality;
 cvar_t *r_screenshotJpegQuality;
@@ -1095,9 +1097,10 @@ R_Register
 */
 void R_Register( void )
 {
-
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	//FIXME: lol badness
 	se_language = ri->Cvar_Get("se_language", "english", CVAR_ARCHIVE | CVAR_NORESTART);
+#endif
 	//
 	// latched and archived variables
 	//
@@ -1118,7 +1121,11 @@ void R_Register( void )
 	r_DynamicGlowSoft					= ri->Cvar_Get( "r_DynamicGlowSoft",				"1",						CVAR_ARCHIVE );
 	r_DynamicGlowWidth					= ri->Cvar_Get( "r_DynamicGlowWidth",				"320",						CVAR_ARCHIVE|CVAR_LATCH );
 	r_DynamicGlowHeight					= ri->Cvar_Get( "r_DynamicGlowHeight",				"240",						CVAR_ARCHIVE|CVAR_LATCH );
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+	r_picmip							= ri->Cvar_Get( "r_picmip",							"1",						CVAR_ARCHIVE|CVAR_LATCH );
+#else
 	r_picmip							= ri->Cvar_Get( "r_picmip",							"0",						CVAR_ARCHIVE|CVAR_LATCH );
+#endif
 	ri->Cvar_CheckRange( r_picmip, 0, 16, qtrue );
 	r_colorMipLevels					= ri->Cvar_Get( "r_colorMipLevels",					"0",						CVAR_LATCH );
 	r_detailTextures					= ri->Cvar_Get( "r_detailtextures",					"1",						CVAR_ARCHIVE|CVAR_LATCH );

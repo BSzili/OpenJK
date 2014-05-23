@@ -50,8 +50,66 @@
 typedef int SOCKET;
 #define INVALID_SOCKET                -1
 #define SOCKET_ERROR                        -1
+#if defined (__AROS__) || defined (__MORPHOS__)
+#include <proto/exec.h>
+#include <proto/socket.h>
+// avoid invalid type conversion errors, due to non compiland headers
+#ifdef __AROS__
+//typedef int socklen_t;
+static struct hostent *gethostbyname_stub(const char *name) {return gethostbyname((char *)name);}
+#undef gethostbyname
+#define gethostbyname gethostbyname_stub
+static int bind_stub(int s, const struct sockaddr *name, int namelen) {return bind(s, (struct sockaddr *)name, namelen);}
+#undef bind
+#define bind bind_stub
+static int recvfrom_stub(int s, void *buf, int len, int flags, struct sockaddr *from, socklen_t *fromlen)
+{
+	return recvfrom(s, (UBYTE *)buf, len, flags, from, (int *)fromlen);
+}
+#undef recvfrom
+#define recvfrom recvfrom_stub
+#endif
+#ifdef __MORPHOS__
+#include <net/socketbasetags.h>
+typedef LONG socklen_t;
+static ULONG inet_addr_stub(const char *cp) {return inet_addr((const UBYTE *)cp);}
+#undef inet_addr
+#define inet_addr inet_addr_stub
+static struct hostent *gethostbyname_stub(const char *name) {return gethostbyname((const UBYTE *)name);}
+#undef gethostbyname
+#define gethostbyname gethostbyname_stub
+static LONG recvfrom_stub(LONG s, char *buf, LONG len, LONG flags, struct sockaddr *from, LONG *fromlen)
+{
+	return recvfrom(s, (UBYTE *)buf, len, flags, from, fromlen);
+}
+#undef recvfrom
+#define recvfrom recvfrom_stub
+static LONG sendto_stub(LONG s, const char *msg, LONG len, LONG flags, const struct sockaddr *to, LONG tolen)
+{
+	return sendto(s, (const UBYTE *)msg, len, flags, to, tolen);
+}
+#undef sendto
+#define sendto sendto_stub
+static LONG send_stub(LONG s, const char *msg, LONG len, LONG flags)
+{
+	return send(s, (const UBYTE *)msg, len, flags);
+}
+#undef send
+#define send send_stub
+static LONG recv_stub(LONG s, char *buf, LONG len, LONG flags)
+{
+	return recv(s, (UBYTE *)buf, len, flags);
+}
+#undef recv
+#define recv recv_stub
+#endif
+#define ioctlsocket IoctlSocket
+#define closesocket CloseSocket
+struct Library *SocketBase;
+#else
 #define closesocket                                close
 #define ioctlsocket                                ioctl
+#endif
 #define socketError                                errno
 
 #endif
@@ -396,7 +454,11 @@ NET_IPSocket
 SOCKET NET_IPSocket( char *net_interface, int port, int *err ) {
 	SOCKET				newsocket;
 	struct sockaddr_in	address;
+#if defined(__AROS__) || defined(__MORPHOS__)
+	char				_true = 1;
+#else
 	u_long				_true = 1;
+#endif
 	int					i = 1;
 
 	*err = 0;
@@ -776,7 +838,11 @@ void NET_GetLocalAddress( void )
 
 	Com_Printf( "Hostname: %s\n", hostInfo->h_name );
 	n = 0;
+#ifdef __amigaos4__
+	while( ( p = (char *)hostInfo->h_aliases[n++] ) != NULL ) {
+#else
 	while( ( p = hostInfo->h_aliases[n++] ) != NULL ) {
+#endif
 		Com_Printf( "Alias: %s\n", p );
 	}
 
@@ -784,7 +850,11 @@ void NET_GetLocalAddress( void )
 		return;
 	}
 
+#ifdef __amigaos4__
+	while( ( p = (char *)hostInfo->h_addr_list[numIP] ) != NULL && numIP < MAX_IPS ) {
+#else
 	while( ( p = hostInfo->h_addr_list[numIP] ) != NULL && numIP < MAX_IPS ) {
+#endif
 		ip = ntohl( *(int *)p );
 		localIP[ numIP ][0] = p[0];
 		localIP[ numIP ][1] = p[1];
@@ -957,6 +1027,22 @@ void NET_Init( void ) {
 	winsockInitialized = qtrue;
 	Com_Printf( "Winsock Initialized\n" );
 #endif
+#if defined(__AROS__) || defined(__MORPHOS__)
+	SocketBase = OpenLibrary("bsdsocket.library", 0);
+	if (!SocketBase)
+	{
+		Com_Printf("WARNING NET_Init: Unable to open bsdsocket.library\n");
+		return;
+	}
+
+	if (SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (IPTR)&errno, TAG_DONE))
+	{
+		CloseLibrary(SocketBase);
+		SocketBase = NULL;
+		Com_Printf("WARNING NET_Init: SocketBaseTags failed\n");
+		return;
+	}
+#endif
 
 	NET_Config( qtrue );
 
@@ -977,6 +1063,13 @@ void NET_Shutdown( void ) {
 #ifdef _WIN32
 	WSACleanup();
 	winsockInitialized = qfalse;
+#endif
+#if defined(__AROS__) || defined(__MORPHOS__)
+	if (SocketBase)
+	{
+		CloseLibrary(SocketBase);
+		SocketBase = NULL;
+	}
 #endif
 }
 

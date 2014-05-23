@@ -93,7 +93,11 @@ char cl_reconnectArgs[MAX_OSPATH] = {0};
 
 // Structure containing functions exported from refresh DLL
 refexport_t	*re = NULL;
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+extern "C" Q_EXPORT refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *refimp );
+#else
 static void	*rendererLib = NULL;
+#endif
 
 ping_t	cl_pinglist[MAX_PINGREQUESTS];
 
@@ -2230,10 +2234,12 @@ static void CL_ShutdownRef( qboolean restarting ) {
 
 	re = NULL;
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	if ( rendererLib != NULL ) {
 		Sys_UnloadDll (rendererLib);
 		rendererLib = NULL;
 	}
+#endif
 }
 
 /*
@@ -2331,11 +2337,14 @@ static IHeapAllocator *GetG2VertSpaceServer( void ) {
 void CL_InitRef( void ) {
 	static refimport_t ri;
 	refexport_t	*ret;
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	GetRefAPI_t	GetRefAPI;
+#endif
 	char		dllName[MAX_OSPATH];
 
 	Com_Printf( "----- Initializing Renderer ----\n" );
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	cl_renderer = Cvar_Get( "cl_renderer", DEFAULT_RENDER_LIBRARY, CVAR_ARCHIVE|CVAR_LATCH );
 
 	Com_sprintf( dllName, sizeof( dllName ), "%s_" ARCH_STRING DLL_EXT, cl_renderer->string );
@@ -2358,6 +2367,7 @@ void CL_InitRef( void ) {
 	GetRefAPI = (GetRefAPI_t)Sys_LoadFunction( rendererLib, "GetRefAPI" );
 	if ( !GetRefAPI )
 		Com_Error( ERR_FATAL, "Can't load symbol GetRefAPI: '%s'", Sys_LibraryError() );
+#endif
 
 	//set up the import table
 	ri.Printf = CL_RefPrintf;

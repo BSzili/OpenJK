@@ -182,6 +182,60 @@
 	#endif
 
 	#define DLL_EXT ".so"
+
+// AROS
+#elif defined(__AROS__)
+
+	#include <aros/cpu.h>
+
+	#define OS_STRING "AROS"
+
+	#define QINLINE /*inline*/
+	#define PATH_SEP '/'
+
+	#if defined __i386__
+		#define ARCH_STRING "i386"
+	#elif defined __x86_64__
+		#define ARCH_STRING "x86_64"
+	#elif defined __powerpc__
+		#define ARCH_STRING "ppc"
+	#elif defined __arm__
+		#define ARCH_STRING "arm"
+	#endif
+
+	#if AROS_BIG_ENDIAN == 1
+		#define Q3_BIG_ENDIAN
+	#else
+		#define Q3_LITTLE_ENDIAN
+	#endif
+
+	#define DLL_EXT ".so"
+
+// AmigaOS 4
+#elif defined(__amigaos4__)
+
+	#define OS_STRING "AmigaOS"
+
+	#define QINLINE /*inline*/
+	#define PATH_SEP '/'
+
+	#define ARCH_STRING "ppc"
+	#define Q3_BIG_ENDIAN
+
+	#define DLL_EXT ".so"
+
+// MorphOS
+#elif defined(__MORPHOS__)
+
+	#define OS_STRING "MorphOS"
+
+	#define QINLINE /*inline*/
+	#define PATH_SEP '/'
+
+	#define ARCH_STRING "ppc"
+	#define Q3_BIG_ENDIAN
+
+	#define DLL_EXT ".so"
 #endif
 
 // catch missing defines in above blocks

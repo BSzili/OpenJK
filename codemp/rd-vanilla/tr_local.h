@@ -4,7 +4,7 @@
 #include "rd-common/tr_public.h"
 #include "rd-common/tr_common.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
 	#include "qgl.h"
 #else
 	#include "../sdl/sdl_qgl.h"
