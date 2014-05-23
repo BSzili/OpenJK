@@ -5,7 +5,7 @@
 #ifndef __QGL_H__
 #define __QGL_H__
 
-#if defined( __LINT__ )
+#if defined( __LINT__ ) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
 
 #include <GL/gl.h>
 

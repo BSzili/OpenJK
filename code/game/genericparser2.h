@@ -23,6 +23,10 @@ This file is part of Jedi Academy.
 #define GENERICPARSER2_H
 
 
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+#undef Write
+#endif
+
 // conditional expression is constant
 // conversion from int to char, possible loss of data
 // unreferenced inline funciton has been removed

@@ -29,7 +29,9 @@ This file is part of Jedi Academy.
 #include "glext.h"
 #else
 #include "qgl.h"
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 #include "../sdl/sdl_qgl.h"
+#endif
 #endif
 
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT

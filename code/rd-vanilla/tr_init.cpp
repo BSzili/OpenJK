@@ -190,6 +190,7 @@ cvar_t	*broadsword_effcorr=0;
 cvar_t	*broadsword_ragtobase=0;
 cvar_t	*broadsword_dircap=0;
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 // More bullshit needed for the proper modular renderer --eez
 cvar_t	*sv_mapname;
 cvar_t	*sv_mapChecksum;
@@ -198,6 +199,7 @@ cvar_t	*se_language;			// JKA
 cvar_t	*sp_language;			// JK2
 #endif
 cvar_t	*com_buildScript;
+#endif
 
 cvar_t	*r_environmentMapping;
 cvar_t *r_screenshotJpegQuality;
@@ -1159,7 +1161,11 @@ void R_Register( void )
 	r_DynamicGlowWidth = ri.Cvar_Get( "r_DynamicGlowWidth", "320", CVAR_ARCHIVE | CVAR_LATCH );
 	r_DynamicGlowHeight = ri.Cvar_Get( "r_DynamicGlowHeight", "240", CVAR_ARCHIVE | CVAR_LATCH );
 
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+	r_picmip = ri.Cvar_Get ("r_picmip", "1", CVAR_ARCHIVE | CVAR_LATCH );
+#else
 	r_picmip = ri.Cvar_Get ("r_picmip", "0", CVAR_ARCHIVE | CVAR_LATCH );
+#endif
 	ri.Cvar_CheckRange( r_picmip, 0, 16, qtrue );
 	r_colorMipLevels = ri.Cvar_Get ("r_colorMipLevels", "0", CVAR_LATCH );
 	r_detailTextures = ri.Cvar_Get( "r_detailtextures", "1", CVAR_ARCHIVE | CVAR_LATCH );
@@ -1301,6 +1307,7 @@ Ghoul2 Insert Start
 Ghoul2 Insert End
 */
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	sv_mapname = ri.Cvar_Get ( "mapname", "nomap", CVAR_SERVERINFO | CVAR_ROM );
 	sv_mapChecksum = ri.Cvar_Get ( "sv_mapChecksum", "", CVAR_ROM );
 	se_language = ri.Cvar_Get ( "se_language", "english", CVAR_ARCHIVE | CVAR_NORESTART );
@@ -1308,6 +1315,7 @@ Ghoul2 Insert End
 	sp_language = ri.Cvar_Get ( "sp_language", va("%d", SP_LANGUAGE_ENGLISH), CVAR_ARCHIVE | CVAR_NORESTART );
 #endif
 	com_buildScript = ri.Cvar_Get ( "com_buildScript", "0", 0 );
+#endif
 
 	r_modelpoolmegs = ri.Cvar_Get("r_modelpoolmegs", "20", CVAR_ARCHIVE);
 	if (ri.LowPhysicalMemory() )

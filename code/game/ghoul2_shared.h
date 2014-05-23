@@ -332,6 +332,10 @@ public:
 
 class CGhoul2Info_v;
 
+#ifdef __amigaos4__
+#undef Delete
+#endif
+
 class IGhoul2InfoArray
 {
 public:

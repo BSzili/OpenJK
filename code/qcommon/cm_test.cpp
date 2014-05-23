@@ -19,6 +19,10 @@ This file is part of Jedi Academy.
 #include "cm_local.h"
 using namespace std;
 
+#if defined(__amigaos4__) || defined(__MORPHOS__)
+#undef _P
+#endif
+
 class CPoint
 {
 public:

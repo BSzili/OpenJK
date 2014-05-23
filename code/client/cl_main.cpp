@@ -84,7 +84,11 @@ clientStatic_t		cls;
 
 // Structure containing functions exported from refresh DLL
 refexport_t	re;
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+extern "C" Q_EXPORT refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *refimp );
+#else
 static void *rendererLib = NULL;
+#endif
 
 //RAZFIXME: BAD BAD, maybe? had to move it out of ghoul2_shared.h -> CGhoul2Info_v at the least..
 IGhoul2InfoArray &_TheGhoul2InfoArray( void ) {
@@ -894,10 +898,12 @@ static void CL_ShutdownRef( qboolean restarting ) {
 
 	memset( &re, 0, sizeof( re ) );
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	if ( rendererLib != NULL ) {
 		Sys_UnloadDll (rendererLib);
 		rendererLib = NULL;
 	}
+#endif
 }
 
 /*
@@ -1078,9 +1084,12 @@ void CL_InitRef( void ) {
 	refexport_t	*ret;
 	refimport_t rit;
 	char		dllName[MAX_OSPATH];
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	GetRefAPI_t	GetRefAPI;
+#endif
 
 	Com_Printf( "----- Initializing Renderer ----\n" );
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
     cl_renderer = Cvar_Get( "cl_renderer", DEFAULT_RENDER_LIBRARY, CVAR_ARCHIVE|CVAR_LATCH );
 
 	Com_sprintf( dllName, sizeof( dllName ), "%s_" ARCH_STRING DLL_EXT, cl_renderer->string );
@@ -1101,6 +1110,7 @@ void CL_InitRef( void ) {
 	GetRefAPI = (GetRefAPI_t)Sys_LoadFunction( rendererLib, "GetRefAPI" );
 	if ( !GetRefAPI )
 		Com_Error( ERR_FATAL, "Can't load symbol GetRefAPI: '%s'", Sys_LibraryError() );
+#endif
 
 #define RIT(y)	rit.y = y
 	RIT(CIN_PlayCinematic);

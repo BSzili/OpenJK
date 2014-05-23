@@ -64,6 +64,11 @@ ____________________________________________________________________________*/
 #endif
 #endif
 
+#if defined(__MORPHOS__) || defined(__amigaos4__)
+#undef LITTLE_ENDIAN
+#define LITTLE_ENDIAN 0
+#endif
+
 #ifndef LITTLE_ENDIAN
 #error Layer III LITTLE_ENDIAN must be defined 0 or 1
 #endif

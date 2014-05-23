@@ -1276,7 +1276,7 @@ qboolean G_CheckInSolid (gentity_t *self, qboolean fix)
 		return qtrue;
 	}
 	
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(__AROS__)
 	if(trace.fraction < 0.99999713)
 #else
 	if(trace.fraction < 1.0)

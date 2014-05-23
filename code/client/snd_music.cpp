@@ -69,6 +69,10 @@ typedef struct
 
 } MusicExitPoint_t;
 
+#ifdef __amigaos4__
+#undef _X
+#endif
+
 struct MusicExitTime_t	// need to declare this way for operator < below
 {
 	float		fTime;

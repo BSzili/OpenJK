@@ -31,7 +31,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 #ifndef SYS_LOADLIB_H_
 #define SYS_LOADLIB_H_
 
-#ifdef DEDICATED
+#if defined(DEDICATED) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
 #	ifdef _WIN32
 #		include <windows.h>
 #		define Sys_LoadLibrary(f) (void*)LoadLibrary(f)

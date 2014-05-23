@@ -27,7 +27,11 @@ This file is part of Jedi Academy.
 #include "tr_local.h"
 #include "../rd-common/tr_common.h"
 #include "../qcommon/sstring.h"
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+#include "libpng/png.h"
+#else
 #include <png.h>
+#endif
 
 
 static byte			 s_intensitytable[256];

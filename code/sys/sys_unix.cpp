@@ -7,6 +7,18 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <libgen.h>
+#ifdef __MORPHOS__
+#include <proto/exec.h>
+#include <proto/dynload.h>
+#define setenv(x, y, z)
+#define unsetenv(x)
+#define dirname(x) x
+#define basename(x) x
+#define realpath(x,y) ((char *)x)
+#endif
+#ifdef __amigaos4__
+#define unsetenv(x)
+#endif
 
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
@@ -115,7 +127,11 @@ TODO
 */
 qboolean Sys_LowPhysicalMemory( void )
 {
+#if defined(__MORPHOS__) || defined(__amigaos4__)
+	return qtrue;
+#else
 	return qfalse;
+#endif
 }
 
 void Conbuf_AppendText( const char *pMsg )
@@ -399,6 +415,7 @@ void Sys_Sleep( int msec )
 	if( msec == 0 )
 		return;
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	if( stdinIsATTY )
 	{
 		fd_set fdset;
@@ -419,6 +436,7 @@ void Sys_Sleep( int msec )
 		}
 	}
 	else
+#endif
 	{
 		// With nothing to select() on, we can't wait indefinitely
 		if( msec < 0 )
@@ -489,6 +507,13 @@ void Sys_ShowConsole( int visLevel, qboolean quitOnClose )
 }
 
 void Sys_Exit( int ex ) {
+#ifdef __MORPHOS__
+	if (DynLoadBase)
+	{
+		CloseLibrary(DynLoadBase);
+		DynLoadBase = NULL;
+	}
+#endif
 #ifdef NDEBUG // regular behavior
   // We can't do this
   //  as long as GL DLL's keep installing with atexit...
@@ -555,6 +580,26 @@ char *Sys_DefaultHomePath(void)
     
 	return homePath;
 }
+#elif defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+char *Sys_DefaultHomePath(void)
+{
+	char *p;
+    
+	if( !*homePath && com_homepath != NULL )
+	{
+		if( ( p = Sys_DefaultInstallPath()) != 0 )
+		{
+			Com_sprintf(homePath, sizeof(homePath), "%s%c.", p, PATH_SEP);
+            
+			if(com_homepath->string[0])
+				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
+			else
+				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
+		}
+	}
+    
+	return homePath;
+}
 #else
 char *Sys_DefaultHomePath(void)
 {
@@ -591,6 +636,9 @@ char *Sys_DefaultHomePath(void)
 
 char *Sys_ConsoleInput(void)
 {
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+	return NULL;
+#else
     static char text[256];
     int     len;
 	fd_set	fdset;
@@ -619,6 +667,7 @@ char *Sys_ConsoleInput(void)
 	text[len-1] = 0;    // rip off the /n and terminate
 
 	return text;
+#endif
 }
 
 /*

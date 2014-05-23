@@ -1,6 +1,26 @@
 #include <dlfcn.h>
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+#include <proto/dos.h>
+#endif
+#ifdef __MORPHOS__
+#include <proto/exec.h>
+#include <locale.h>
+struct Library *DynLoadBase = NULL;
+#endif
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
+
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+static const char * __attribute__((used)) version = "$VER: OpenJK SP 1.1 (10.5.2014) " OS_STRING " port by Szilárd Biró";
+#ifdef __amigaos4__
+static const char * __attribute__((used)) stack = "$STACK: 1048576";
+#else
+int __stack = 1048576;
+#endif
+#ifdef __AROS__
+#include "../aros/incstack.h"
+#endif
+#endif
 
 #include "sys_loadlib.h"
 #include "sys_local.h"
@@ -15,7 +35,11 @@ Sys_SetBinaryPath
 */
 void Sys_SetBinaryPath(const char *path)
 {
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+	NameFromLock(GetProgramDir(), (STRPTR)binaryPath, sizeof(binaryPath));
+#else
 	Q_strncpyz(binaryPath, path, sizeof(binaryPath));
+#endif
 }
 
 /*
@@ -141,7 +165,15 @@ void Sys_UnloadGame (void)
 {
 	Com_Printf("------ Unloading Game ------\n");
 	if (game_library)
+	{
+#ifdef __MORPHOS__
+		void (*morphos_so_deinit)(void);
+		morphos_so_deinit = (void (*)())Sys_LoadFunction(game_library, "morphos_so_deinit");
+		if (morphos_so_deinit)
+			morphos_so_deinit();
+#endif
 		Sys_UnloadLibrary (game_library);
+	}
 	game_library = NULL;
 }
 
@@ -166,6 +198,10 @@ void *Sys_GetGameAPI (void *parms)
     const char  *apppath;
 #endif
 	const char	*fn;
+#ifdef __MORPHOS__
+	int  (*morphos_so_init)(void);
+	void (*morphos_so_deinit)(void);
+#endif
 	
 #ifdef JK2_MODE
 	const char *gamename = "jospgame" ARCH_STRING DLL_EXT;
@@ -261,6 +297,18 @@ void *Sys_GetGameAPI (void *parms)
 		Com_Error( ERR_FATAL, "Couldn't load game" );
 	}
 	
+#ifdef __MORPHOS__
+	morphos_so_init = (int (*)())Sys_LoadFunction(game_library, "morphos_so_init");
+	morphos_so_deinit = (void (*)())Sys_LoadFunction(game_library, "morphos_so_deinit");
+
+	if (!(morphos_so_init && morphos_so_deinit && morphos_so_init()))
+	{
+		Com_Printf("can't find the morphos_so_init and morphos_so_deinit symbols\n");
+		Sys_UnloadGame ();
+		return NULL;
+	}
+#endif
+	
 	
 	Com_Printf ( "Sys_GetGameAPI(%s): succeeded ...\n", fn );
 
@@ -288,6 +336,12 @@ void * Sys_LoadCgame( intptr_t (**entryPoint)(int, ...), intptr_t (*systemcalls)
 	dllEntry = ( void (*)( intptr_t (*)( intptr_t, ... ) ) )Sys_LoadFunction( game_library, "dllEntry" );
 	*entryPoint = (intptr_t (*)(int,...))Sys_LoadFunction( game_library, "vmMain" );
 	if ( !*entryPoint || !dllEntry ) {
+#ifdef __MORPHOS__
+		void (*morphos_so_deinit)(void);
+		morphos_so_deinit = (void (*)())Sys_LoadFunction(game_library, "morphos_so_deinit");
+		if (morphos_so_deinit)
+			morphos_so_deinit();
+#endif
 		Sys_UnloadLibrary( game_library );
 		return NULL;
 	}
@@ -345,7 +399,26 @@ int main (int argc, char **argv)
 	if ( argc >= 2 && Q_strncmp ( argv[1], "-psn", 4 ) == 0 )
 		argc = 1;
 #endif
-	
+
+#ifdef __MORPHOS__
+	// don't let locales with decimal comma screw up the string to float conversions
+	setlocale(LC_NUMERIC, "C");
+
+	DynLoadBase = OpenLibrary("dynload.library", 51);
+
+	if (DynLoadBase && DynLoadBase->lib_Revision < 3)
+	{
+		CloseLibrary(DynLoadBase);
+		DynLoadBase = NULL;
+	}
+
+	if (!DynLoadBase)
+	{
+		printf("Unable to open dynload.library version 51.3 or newer\n");
+		Sys_Exit(1);
+	}
+#endif
+
 	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
 

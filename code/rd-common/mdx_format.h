@@ -35,6 +35,10 @@ This file is part of Jedi Academy.
 #define MDX_FORMAT_H
 
 
+#if defined(__amigaos4__) || defined(__MORPHOS__)
+#undef _X
+#endif
+
 #define MDXM_IDENT			(('M'<<24)+('G'<<16)+('L'<<8)+'2')
 #define MDXA_IDENT			(('A'<<24)+('G'<<16)+('L'<<8)+'2')
 
