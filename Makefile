@@ -25,8 +25,7 @@ CXXFLAGS = $(CFLAGS) $(CXXFLAGS_COMMON)
 
 .PHONY: all clean
 
-all: openjk_sp.$(ARCH) base/jagame$(ARCH).so openjk.$(ARCH) base/jampgame$(ARCH).so base/cgame$(ARCH).so base/ui$(ARCH).so
-# openjo_sp.$(ARCH) base/jospgame$(ARCH).so
+all: openjk_sp.$(ARCH) base/jagame$(ARCH).so openjk.$(ARCH) base/jampgame$(ARCH).so base/cgame$(ARCH).so base/ui$(ARCH).so openjo_sp.$(ARCH) base/jospgame$(ARCH).so
 
 clean:
 	rm -Rf build
