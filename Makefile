@@ -425,7 +425,6 @@ CLIENT_SP_OBJS_ = \
 	code/rd-common/tr_font.o \
 	code/rd-common/tr_image_jpg.o \
 	code/rd-common/tr_image_load.o \
-	code/rd-common/tr_image_manipulation.o \
 	code/rd-common/tr_image_png.o \
 	code/rd-common/tr_image_tga.o \
 	code/rd-common/tr_noise.o \
