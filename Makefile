@@ -25,7 +25,7 @@ CXXFLAGS = $(CFLAGS) $(CXXFLAGS_COMMON)
 
 .PHONY: all clean
 
-all: openjk_sp.$(ARCH) base/jagame$(ARCH).so openjk.$(ARCH) base/jampgame$(ARCH).so base/cgame$(ARCH).so base/ui$(ARCH).so openjo_sp.$(ARCH) base/jospgame$(ARCH).so
+all: openjk_sp base/jagame$(ARCH).so openjk base/jampgame$(ARCH).so base/cgame$(ARCH).so base/ui$(ARCH).so openjo_sp base/jospgame$(ARCH).so
 
 clean:
 	rm -Rf build
@@ -41,24 +41,24 @@ build/client_jasp/%.o: %.cpp
 	$(MKDIR) $(@D)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-openjk_sp.$(ARCH): CFLAGS += -D_JK2EXE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
-openjk_sp.$(ARCH): CXXFLAGS += -D_JK2EXE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
-openjk_sp.$(ARCH): LDFLAGS += -lGL
+openjk_sp: CFLAGS += -D_JK2EXE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjk_sp: CXXFLAGS += -D_JK2EXE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjk_sp: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
-openjk_sp.$(ARCH): CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
-openjk_sp.$(ARCH): CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
-openjk_sp.$(ARCH): LDFLAGS += -use-dynld -ldl -lauto
+openjk_sp: CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
+openjk_sp: CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
+openjk_sp: LDFLAGS += -use-dynld -ldl -lauto
 endif
 
 ifeq ($(OSTYPE), AROS)
-openjk_sp.$(ARCH): LDFLAGS += -ldll
+openjk_sp: LDFLAGS += -ldll
 endif
 
 ifeq ($(OSTYPE), MorphOS)
-openjk_sp.$(ARCH): CFLAGS += -noixemul
-openjk_sp.$(ARCH): CXXFLAGS += -noixemul
-openjk_sp.$(ARCH): LDFLAGS += -noixemul
+openjk_sp: CFLAGS += -noixemul
+openjk_sp: CXXFLAGS += -noixemul
+openjk_sp: LDFLAGS += -noixemul
 endif
 
 
@@ -100,24 +100,24 @@ build/client_jamp/%.o: %.c
 	$(MKDIR) $(@D)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-openjk.$(ARCH): CFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
-openjk.$(ARCH): CXXFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
-openjk.$(ARCH): LDFLAGS += -lGL
+openjk: CFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
+openjk: CXXFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
+openjk: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
-openjk.$(ARCH): CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
-openjk.$(ARCH): CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
-openjk.$(ARCH): LDFLAGS += -use-dynld -ldl -lauto
+openjk: CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
+openjk: CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
+openjk: LDFLAGS += -use-dynld -ldl -lauto
 endif
 
 ifeq ($(OSTYPE), AROS)
-openjk.$(ARCH): LDFLAGS += -ldll
+openjk: LDFLAGS += -ldll
 endif
 
 ifeq ($(OSTYPE), MorphOS)
-openjk.$(ARCH): CFLAGS += -noixemul
-openjk.$(ARCH): CXXFLAGS += -noixemul
-openjk.$(ARCH): LDFLAGS += -noixemul
+openjk: CFLAGS += -noixemul
+openjk: CXXFLAGS += -noixemul
+openjk: LDFLAGS += -noixemul
 endif
 
 
@@ -203,24 +203,24 @@ build/client_josp/%.o: %.cpp
 	$(MKDIR) $(@D)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-openjo_sp.$(ARCH): CFLAGS += -D_JK2EXE -DJK2_MODE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
-openjo_sp.$(ARCH): CXXFLAGS += -D_JK2EXE -DJK2_MODE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
-openjo_sp.$(ARCH): LDFLAGS += -lGL
+openjo_sp: CFLAGS += -D_JK2EXE -DJK2_MODE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjo_sp: CXXFLAGS += -D_JK2EXE -DJK2_MODE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjo_sp: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
-openjo_sp.$(ARCH): CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
-openjo_sp.$(ARCH): CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
-openjo_sp.$(ARCH): LDFLAGS += -use-dynld -ldl -lauto
+openjo_sp: CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
+openjo_sp: CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__
+openjo_sp: LDFLAGS += -use-dynld -ldl -lauto
 endif
 
 ifeq ($(OSTYPE), AROS)
-openjo_sp.$(ARCH): LDFLAGS += -ldll
+openjo_sp: LDFLAGS += -ldll
 endif
 
 ifeq ($(OSTYPE), MorphOS)
-openjo_sp.$(ARCH): CFLAGS += -noixemul
-openjo_sp.$(ARCH): CXXFLAGS += -noixemul
-openjo_sp.$(ARCH): LDFLAGS += -noixemul
+openjo_sp: CFLAGS += -noixemul
+openjo_sp: CXXFLAGS += -noixemul
+openjo_sp: LDFLAGS += -noixemul
 endif
 
 
@@ -1196,14 +1196,14 @@ UI_JAMP_OBJS = $(patsubst %,build/ui_jamp/%,$(UI_JAMP_OBJS_))
 # targets
 
 # SP
-openjk_sp.$(ARCH): $(CLIENT_JASP_OBJS)
+openjk_sp: $(CLIENT_JASP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 base/jagame$(ARCH).so: $(GAME_JASP_OBJS)
 	$(MKDIR) $(@D)
 	$(CXX) $^ $(LDFLAGS) -o $@	
 
-openjo_sp.$(ARCH): $(CLIENT_JOSP_OBJS)
+openjo_sp: $(CLIENT_JOSP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 base/jospgame$(ARCH).so: $(GAME_JOSP_OBJS)
@@ -1211,7 +1211,7 @@ base/jospgame$(ARCH).so: $(GAME_JOSP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 # MP
-openjk.$(ARCH): $(CLIENT_JAMP_OBJS)
+openjk: $(CLIENT_JAMP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 base/cgame$(ARCH).so: $(CGAME_JAMP_OBJS)
