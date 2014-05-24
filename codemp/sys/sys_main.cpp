@@ -181,6 +181,9 @@ void Sys_Error( const char *error, ... )
 }
 
 void Sys_Quit (void) {
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+	NET_Shutdown();
+#endif
 	IN_Shutdown();
 
 	Com_ShutdownZoneMemory();
