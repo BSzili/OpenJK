@@ -218,9 +218,9 @@ openjo_sp.$(ARCH): LDFLAGS += -ldll
 endif
 
 ifeq ($(OSTYPE), MorphOS)
-openjk_sp.$(ARCH): CFLAGS += -noixemul
-openjk_sp.$(ARCH): CXXFLAGS += -noixemul
-openjk_sp.$(ARCH): LDFLAGS += -noixemul
+openjo_sp.$(ARCH): CFLAGS += -noixemul
+openjo_sp.$(ARCH): CXXFLAGS += -noixemul
+openjo_sp.$(ARCH): LDFLAGS += -noixemul
 endif
 
 
