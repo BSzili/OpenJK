@@ -476,20 +476,23 @@ void IN_ProcessEvents(void)
 						state = !(inputev->ie_Code & IECODE_UP_PREFIX);
 						inputev->ie_Code &= ~IECODE_UP_PREFIX;
 
-						//if (inputev->ie_Code != 0)
+#ifdef _JK2EXE
+						if (state && Key_GetCatcher() & KEYCATCH_CONSOLE)
+#else
+						if (state && Key_GetCatcher() & (KEYCATCH_CONSOLE | KEYCATCH_MESSAGE))
+#endif
 						{
-							char bufascii;
-							if (MapRawKey(inputev, (STRPTR)&bufascii, sizeof(bufascii), NULL) > 0)
+							if (MapRawKey(inputev, (STRPTR)&mapped, sizeof(mapped), NULL) <= 0 || mapped > MAX_KEYS)
 							{
-								mapped = (bufascii == 8) ? A_BACKSPACE : bufascii;
-								//Com_Printf("MAPPED: %d DEST: %d\n", bufascii, Key_GetCatcher());
+								mapped = 0;
 							}
+							//printf("MAPPED: %x NAME '%s'\n", mapped, Key_KeynumToString(mapped));
 						}
 
 						if (inputev->ie_Code < MAX_KEYCONV)
 						{
 							sym = keyconv[inputev->ie_Code];
-							//Com_Printf("SCAN: %d GAME %d DEST: %d\n", inputev->ie_Code, sym, Key_GetCatcher());
+							//printf("SCAN: %d GAME %d NAME '%s'\n", inputev->ie_Code, sym, Key_KeynumToString(sym));
 						}
 						break;
 				}
@@ -528,14 +531,17 @@ void IN_ProcessEvents(void)
 #endif
 		}
 
+		// the console and text input fields require SE_CHAR events
+		if (mapped)
+		{
+			Sys_QueEvent(u_sys_msecs, SE_CHAR, mapped, qfalse, 0, NULL);
+		}
+
 		if (sym)
 		{
 			if (state != -1)
 			{
 				Sys_QueEvent(u_sys_msecs, SE_KEY, sym, state, 0, NULL);
-				// the console and text input fields require SE_CHAR events
-				if (state && mapped)
-					Sys_QueEvent(u_sys_msecs, SE_CHAR, mapped, qfalse, 0, NULL);
 			}
 			else
 			{
