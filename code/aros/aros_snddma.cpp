@@ -35,8 +35,11 @@
 #undef __cplusplus
 #endif
 #include <proto/ahi.h>
-//#include <utility/hooks.h>
+#ifdef __MORPHOS__
+#include <utility/hooks.h>
+#else
 #include <SDI/SDI_hook.h>
+#endif
 
 #include "qcommon/q_shared.h"
 #include "client/client.h"
@@ -58,10 +61,11 @@ static BYTE AHIDevice = -1;
 static struct AHIAudioCtrl *actrl = NULL;
 static ULONG rc = 1;
 static struct AHIChannelInfo info;
+static struct Hook EffectHook;
 static byte *dmabuf = NULL;
 
-/*#ifdef __MORPHOS__
-void EffectFunction()
+#ifdef __MORPHOS__
+static void EffectFunction()
 {
 	struct Hook *hook = (struct Hook *)REG_A0;
 	struct AHIEffChannelInfo *aeci = (struct AHIEffChannelInfo *)REG_A1;
@@ -71,13 +75,12 @@ static struct EmulLibEntry EffectFunc =
 {
 	TRAP_LIB, 0, (void (*)(void))EffectFunction
 };
-#else*/
+#else
 HOOKPROTO(EffectFunc, void, struct AHIAudioCtrl *actrl, struct AHIEffChannelInfo *aeci)
 {
 	hook->h_Data = (APTR)aeci->ahieci_Offset[0];
 }
-//#endif
-MakeHook(EffectHook, EffectFunc);
+#endif
 
 void SNDDMA_Shutdown(void)
 {
@@ -139,11 +142,10 @@ qboolean SNDDMA_Init(void)
 	int buflen;
 
 	info.aeci.ahieci_Channels = 1;
-	//info.aeci.ahieci_Func = &EffHook;
 	info.aeci.ahieci_Func = &EffectHook;
 	info.aeci.ahie_Effect = AHIET_CHANNELINFO;
-	/*EffHook.h_Data = 0;
-	EffHook.h_Entry = (void *)&EffFunc;*/
+	EffectHook.h_Data = 0;
+	EffectHook.h_Entry = (HOOKFUNC)&EffectFunc;
 
 	if (s_khz->integer == 44) 
 		speed = 44100;
