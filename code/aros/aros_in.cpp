@@ -31,7 +31,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <proto/intuition.h>
 #include <proto/exec.h>
 #include <proto/keymap.h>
+#ifndef __MORPHOS__
 #include <SDI/SDI_interrupt.h>
+#endif
 
 #include "client/client.h"
 #include "rd-vanilla/tr_local.h"
@@ -482,9 +484,12 @@ void IN_ProcessEvents(void)
 						if (state && Key_GetCatcher() & (KEYCATCH_CONSOLE | KEYCATCH_MESSAGE))
 #endif
 						{
-							if (MapRawKey(inputev, (STRPTR)&mapped, sizeof(mapped), NULL) <= 0 || mapped > MAX_KEYS)
+							UBYTE bufascii[2] = {0, 0};
+							if (MapRawKey(inputev, (STRPTR)bufascii, sizeof(bufascii), NULL) > 0)
 							{
-								mapped = 0;
+								mapped = bufascii[0] + bufascii[1] * 256;
+								if (mapped > MAX_KEYS)
+									mapped = 0;
 							}
 							//printf("MAPPED: %x NAME '%s'\n", mapped, Key_KeynumToString(mapped));
 						}
