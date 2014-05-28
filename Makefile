@@ -25,7 +25,7 @@ CXXFLAGS = $(CFLAGS) $(CXXFLAGS_COMMON)
 
 .PHONY: all clean
 
-all: openjk_sp base/jagame$(ARCH).so openjk base/jampgame$(ARCH).so base/cgame$(ARCH).so base/ui$(ARCH).so openjo_sp base/jospgame$(ARCH).so
+all: openjk_sp base/jagame$(ARCH).so openjk_mp base/jampgame$(ARCH).so base/cgame$(ARCH).so base/ui$(ARCH).so openjo_sp base/jospgame$(ARCH).so
 
 clean:
 	rm -Rf build
@@ -100,24 +100,24 @@ build/client_jamp/%.o: %.c
 	$(MKDIR) $(@D)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-openjk: CFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
-openjk: CXXFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
-openjk: LDFLAGS += -lGL
+openjk_mp: CFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
+openjk_mp: CXXFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
+openjk_mp: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
-openjk: CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
-openjk: CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
-openjk: LDFLAGS += -use-dynld -ldl -lauto
+openjk_mp: CFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
+openjk_mp: CXXFLAGS += -D__USE_INLINE__ -D__USE_BASETYPE__ -DC_ONLY
+openjk_mp: LDFLAGS += -use-dynld -ldl -lauto
 endif
 
 ifeq ($(OSTYPE), AROS)
-openjk: LDFLAGS += -ldll
+openjk_mp: LDFLAGS += -ldll
 endif
 
 ifeq ($(OSTYPE), MorphOS)
-openjk: CFLAGS += -noixemul
-openjk: CXXFLAGS += -noixemul
-openjk: LDFLAGS += -noixemul
+openjk_mp: CFLAGS += -noixemul
+openjk_mp: CXXFLAGS += -noixemul
+openjk_mp: LDFLAGS += -noixemul
 endif
 
 
@@ -1211,7 +1211,7 @@ base/jospgame$(ARCH).so: $(GAME_JOSP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 # MP
-openjk: $(CLIENT_JAMP_OBJS)
+openjk_mp: $(CLIENT_JAMP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 base/cgame$(ARCH).so: $(CGAME_JAMP_OBJS)
