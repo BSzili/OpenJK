@@ -54,7 +54,12 @@ SavedGameJustLoaded_e eSavedGameJustLoaded = eNO;
 qboolean qbSGReadIsTestOnly = qfalse;	// this MUST be left in this state
 char sLastSaveFileLoaded[MAX_QPATH]={0};
 
+#ifdef JK2_MODE
+#define SG_MAGIC 0x1234abcd
+#define iSG_MAPCMD_SIZE MAX_TOKEN_CHARS
+#else
 #define iSG_MAPCMD_SIZE MAX_QPATH
+#endif
 
 static char *SG_GetSaveGameMapName(const char *psPathlessBaseName);
 static void CompressMem_FreeScratchBuffer(void);
@@ -803,6 +808,9 @@ int SG_GetSaveGameComment(const char *psPathlessBaseName, char *sComment, char *
 {
 	int ret = 0;
 	time_t tFileTime;
+#ifdef JK2_MODE
+	int iScreenShotLength;
+#endif
 
 	qbSGReadIsTestOnly = qtrue;	// do NOT leave this in this state
 
@@ -818,10 +826,20 @@ int SG_GetSaveGameComment(const char *psPathlessBaseName, char *sComment, char *
 		if (SG_Read( INT_ID('C','M','T','M'), &fileTime, sizeof(fileTime)))	//read
 		{
 			tFileTime = SG_GetTime (fileTime);
-			if (SG_Read(INT_ID('M','P','C','M'), sMapName, iSG_MAPCMD_SIZE ))	// read
+#ifdef JK2_MODE
+			if (SG_Read(INT_ID('S','H','L','N'), &iScreenShotLength, sizeof(iScreenShotLength)))	// read
 			{
-				ret = tFileTime;
+				if (SG_Read(INT_ID('S','H','O','T'), NULL, iScreenShotLength, NULL))	// skip
+				{
+#endif
+					if (SG_Read(INT_ID('M','P','C','M'), sMapName, iSG_MAPCMD_SIZE ))	// read
+					{
+						ret = tFileTime;
+					}
+#ifdef JK2_MODE
+				}
 			}
+#endif
 		}
 	}
 	qbSGReadIsTestOnly = qfalse;
@@ -851,9 +869,51 @@ static char *SG_GetSaveGameMapName(const char *psPathlessBaseName)
 }
 
 
+#ifdef JK2_MODE
+// Dummy functions
+void Decompress_JPG( const char *filename, byte *pJPGData, unsigned char **pic, int *width, int *height ) 
+{
+	*pic = (byte *) Z_Malloc(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4, TAG_TEMP_WORKSPACE, qtrue);
+	*width = SG_SCR_WIDTH;
+	*height = SG_SCR_HEIGHT;
+}
+
+byte *Compress_JPG(int *pOutputSize, int quality, int image_width, int image_height, byte *image_buffer, qboolean bInvertDuringCompression)
+{
+	byte dummy1px[285] = {
+		0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00,
+		0x60, 0x00, 0x60, 0x00, 0x00, 0xFF, 0xDB, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06,
+		0x05, 0x08, 0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0A, 0x0C, 0x14, 0x0D, 0x0C, 0x0B, 0x0B,
+		0x0C, 0x19, 0x12, 0x13, 0x0F, 0x14, 0x1D, 0x1A, 0x1F, 0x1E, 0x1D, 0x1A, 0x1C, 0x1C, 0x20,
+		0x24, 0x2E, 0x27, 0x20, 0x22, 0x2C, 0x23, 0x1C, 0x1C, 0x28, 0x37, 0x29, 0x2C, 0x30, 0x31,
+		0x34, 0x34, 0x34, 0x1F, 0x27, 0x39, 0x3D, 0x38, 0x32, 0x3C, 0x2E, 0x33, 0x34, 0x32, 0xFF,
+		0xDB, 0x00, 0x43, 0x01, 0x09, 0x09, 0x09, 0x0C, 0x0B, 0x0C, 0x18, 0x0D, 0x0D, 0x18, 0x32,
+		0x21, 0x1C, 0x21, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32,
+		0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32,
+		0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32,
+		0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x00, 0x01,
+		0x00, 0x01, 0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xFF, 0xC4, 0x00,
+		0x15, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x08, 0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xC4, 0x00,
+		0x14, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0xFF, 0xC4, 0x00, 0x14, 0x11, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xDA, 0x00, 0x0C,
+		0x03, 0x01, 0x00, 0x02, 0x11, 0x03, 0x11, 0x00, 0x3F, 0x00, 0x9F, 0xC0, 0x07, 0xFF, 0xD9 };
+
+	*pOutputSize = sizeof(dummy1px);
+	byte *buffer = (byte *) Z_Malloc(*pOutputSize, TAG_TEMP_WORKSPACE, qfalse);
+	memcpy(buffer, dummy1px, sizeof(dummy1px));
+
+	return buffer;
+}
+
+extern void SCR_SetScreenshot(const byte *pbData, int w, int h);
+extern byte* SCR_TempRawImage_ReadFromFile(const char *psLocalFilename, int *piWidth, int *piHeight, byte *pbReSampleBuffer, qboolean qbVertFlip);
+extern void  SCR_TempRawImage_CleanUp();
+
 // pass in qtrue to set as loading screen, else pass in pvDest to read it into there...
 //
-/*
 static qboolean SG_ReadScreenshot(qboolean qbSetAsLoadingScreen, void *pvDest = NULL);
 static qboolean SG_ReadScreenshot(qboolean qbSetAsLoadingScreen, void *pvDest)
 {
@@ -866,7 +926,7 @@ static qboolean SG_ReadScreenshot(qboolean qbSetAsLoadingScreen, void *pvDest)
 	//
 	// alloc enough space plus extra 4K for sloppy JPG-decode reader to not do memory access violation...
 	//
-	byte *pJPGData = (byte *) Z_Malloc(iScreenShotLength + 4096,TAG_TEMP_SAVEGAME_WORKSPACE, qfalse);
+	byte *pJPGData = (byte *) Z_Malloc(iScreenShotLength + 4096,TAG_TEMP_WORKSPACE, qfalse);
 	//
 	// now read the JPG data...
 	//
@@ -899,7 +959,6 @@ static qboolean SG_ReadScreenshot(qboolean qbSetAsLoadingScreen, void *pvDest)
 	Z_Free( pDecompressedPic );
 
 	return bReturn;
-#endif
 }
 // Gets the savegame screenshot
 //
@@ -909,31 +968,6 @@ qboolean SG_GetSaveImage( const char *psPathlessBaseName, void *pvAddress )
 	{
 		return qfalse;
 	}
-//JLFSAVEGAME
-#if 0
-	unsigned short saveGameName[filepathlength];
-	char directoryInfo[filepathlength];
-	char psLocalFilename[filepathlength];
-	DWORD bytesRead;
-	
-	mbstowcs(saveGameName, psPathlessBaseName,filepathlength);
-	
-	XCreateSaveGame("U:\\", saveGameName, OPEN_ALWAYS, 0,directoryInfo, filepathlength);
-
-	strcpy (psLocalFilename , directoryInfo);
-	strcat (psLocalFilename , "saveimage.xbx");
-
-
-	sg_Handle = NULL;
-	sg_Handle = CreateFile(psLocalFilename, GENERIC_READ, FILE_SHARE_READ, 0, 
-		OPEN_EXISTING,	FILE_ATTRIBUTE_NORMAL, 0);
-
-	if (!sg_Handle)
-		return qfalse;
-
-
-
-#else
 
 	if (!SG_Open(psPathlessBaseName))
 	{
@@ -946,7 +980,6 @@ qboolean SG_GetSaveImage( const char *psPathlessBaseName, void *pvAddress )
 	qboolean bGotSaveImage = SG_ReadScreenshot(qfalse, pvAddress);
 
 	SG_Close();
-#endif
 	return bGotSaveImage;
 }
 
@@ -979,7 +1012,7 @@ static void SG_WriteScreenshot(qboolean qbAutosave, const char *psMapName)
 	Z_Free(pJPGData);
 	SCR_TempRawImage_CleanUp();
 }
-*/
+#endif
 
 qboolean SG_GameAllowedToSaveHere(qboolean inCamera)
 {
@@ -1051,7 +1084,9 @@ qboolean SG_WriteSavegame(const char *psPathlessBaseName, qboolean qbAutosave)
 	Q_strncpyz( sMapCmd,psMapName, sizeof(sMapCmd));	// need as array rather than ptr because const strlen needed for MPCM chunk
 
 	SG_WriteComment(qbAutosave, sMapCmd);
-//	SG_WriteScreenshot(qbAutosave, sMapCmd);
+#ifdef JK2_MODE
+	SG_WriteScreenshot(qbAutosave, sMapCmd);
+#endif
 	SG_Append(INT_ID('M','P','C','M'), sMapCmd, sizeof(sMapCmd));
 	SG_WriteCvars();
 
@@ -1092,6 +1127,10 @@ qboolean SG_ReadSavegame(const char *psPathlessBaseName)
 	int iPrevTestSave = sv_testsave->integer;
 	sv_testsave->integer = 0;
 
+#ifdef JK2_MODE
+	Cvar_Set( "cg_missionstatusscreen", "0" );//reset if loading a game
+#endif
+
 	if (!SG_Open( psPathlessBaseName ))
 	{
 		Com_Printf (GetString_FailedToOpenSaveGame(psPathlessBaseName, qtrue));//S_COLOR_RED "Failed to open savegame \"%s\"\n", psPathlessBaseName);
@@ -1112,7 +1151,9 @@ qboolean SG_ReadSavegame(const char *psPathlessBaseName)
 	Com_DPrintf("Reading: %s\n", sComment);
 	SG_Read( INT_ID('C','M','T','M'), NULL, sizeof( unsigned int ));
 
-//	SG_ReadScreenshot(qtrue);	// qboolean qbSetAsLoadingScreen
+#ifdef JK2_MODE
+	SG_ReadScreenshot(qtrue);	// qboolean qbSetAsLoadingScreen
+#endif
 	SG_Read(INT_ID('M','P','C','M'), sMapCmd, sizeof(sMapCmd));
 	SG_ReadCvars();
 
@@ -1313,6 +1354,9 @@ int SG_Write(const void * chid, const int bytesize, fileHandle_t fhSaveGame)
 qboolean SG_Append(unsigned int chid, const void *pvData, int iLength)
 {	
 	unsigned int	uiCksum;
+#ifdef JK2_MODE
+	unsigned int	uiMagic = SG_MAGIC;
+#endif
 	unsigned int	uiSaved;
 	
 #ifdef _DEBUG
@@ -1347,6 +1391,12 @@ qboolean SG_Append(unsigned int chid, const void *pvData, int iLength)
 			iLength = -iLength;
 			uiSaved += SG_Write(&iLength,			sizeof(iLength),			fhSaveGame);
 			iLength = -iLength;
+#ifdef JK2_MODE
+			//
+			// CRC...
+			//
+			uiSaved += SG_Write(&uiCksum,			sizeof(uiCksum),			fhSaveGame);
+#endif
 			//
 			// [compressed length]
 			//
@@ -1355,12 +1405,21 @@ qboolean SG_Append(unsigned int chid, const void *pvData, int iLength)
 			// compressed data...
 			//
 			uiSaved += SG_Write(pbCompressedData,	iCompressedLength,			fhSaveGame);
+#ifdef JK2_MODE
+			//
+			// magic...
+			//
+			uiSaved += SG_Write(&uiMagic,			sizeof(uiMagic),			fhSaveGame);
+
+			if (uiSaved != sizeof(chid) + sizeof(iLength) + sizeof(uiCksum) + sizeof(iCompressedLength) + iCompressedLength + sizeof(uiMagic))
+#else
 			//
 			// CRC...
 			//
 			uiSaved += SG_Write(&uiCksum,			sizeof(uiCksum),			fhSaveGame);
 
 			if (uiSaved != sizeof(chid) + sizeof(iLength) + sizeof(uiCksum) + sizeof(iCompressedLength) + iCompressedLength)
+#endif
 			{
 				Com_Printf(S_COLOR_RED "Failed to write %s chunk\n", SG_GetChidText(chid));
 				gbSGWriteFailed = qtrue;
@@ -1372,16 +1431,31 @@ qboolean SG_Append(unsigned int chid, const void *pvData, int iLength)
 			// uncompressed...
 			//
 			uiSaved += SG_Write(&iLength,	sizeof(iLength),	fhSaveGame);
+#ifdef JK2_MODE
+			//
+			// CRC...
+			//
+			uiSaved += SG_Write(&uiCksum,	sizeof(uiCksum),	fhSaveGame);
+#endif
 			//
 			// uncompressed data...
 			//
 			uiSaved += SG_Write( pvData,	iLength,			fhSaveGame);
+#ifdef JK2_MODE
+			//
+			// magic...
+			//
+			uiSaved += SG_Write(&uiMagic,	sizeof(uiMagic),	fhSaveGame);
+
+			if (uiSaved != sizeof(chid) + sizeof(iLength) + sizeof(uiCksum) + iLength + sizeof(uiMagic))
+#else
 			//
 			// CRC...
 			//
 			uiSaved += SG_Write(&uiCksum,	sizeof(uiCksum),	fhSaveGame);
 
 			if (uiSaved != sizeof(chid) + sizeof(iLength) + sizeof(uiCksum) + iLength)
+#endif
 			{
 				Com_Printf(S_COLOR_RED "Failed to write %s chunk\n", SG_GetChidText(chid));
 				gbSGWriteFailed = qtrue;
@@ -1421,6 +1495,9 @@ int SG_Seek( fileHandle_t fhSaveGame, long offset, int origin )
 static int SG_Read_Actual(unsigned int chid, void *pvAddress, int iLength, void **ppvAddressPtr, qboolean bChunkIsOptional)
 {
 	unsigned int	uiLoadedCksum, uiCksum;
+#ifdef JK2_MODE
+	unsigned int	uiLoadedMagic;
+#endif
 	unsigned int	uiLoadedLength;
 	unsigned int	ulLoadedChid;
 	unsigned int	uiLoaded;
@@ -1475,6 +1552,12 @@ static int SG_Read_Actual(unsigned int chid, void *pvAddress, int iLength, void 
 	}
 	iLength = uiLoadedLength;	// for retval
 
+#ifdef JK2_MODE
+	// Get checksum...
+	//
+	uiLoaded += SG_ReadBytes( &uiLoadedCksum,  sizeof(uiLoadedCksum), fhSaveGame );
+#endif
+
 	// alloc?...
 	//
 	if ( !pvAddress )
@@ -1523,9 +1606,13 @@ static int SG_Read_Actual(unsigned int chid, void *pvAddress, int iLength, void 
 	{
 		uiLoaded += SG_ReadBytes(  pvAddress, iLength, fhSaveGame );
 	}
+#ifdef JK2_MODE
+	uiLoaded += SG_ReadBytes( &uiLoadedMagic,  sizeof(uiLoadedMagic), fhSaveGame );
+#else
 	// Get checksum...
 	//
 	uiLoaded += SG_ReadBytes( &uiLoadedCksum,  sizeof(uiLoadedCksum), fhSaveGame );
+#endif
 
 	// Make sure the checksums match...
 	//
@@ -1546,9 +1633,33 @@ static int SG_Read_Actual(unsigned int chid, void *pvAddress, int iLength, void 
 		return 0;
 	}
 
+#ifdef JK2_MODE
+	// Make sure the terminating magic number is there and correct...
+	//
+	if( uiLoadedMagic != SG_MAGIC)
+	{
+		if (!qbSGReadIsTestOnly)
+		{
+			Com_Error(ERR_DROP, "Bad savegame magic for chunk %s", SG_GetChidText(chid));
+		}
+		else
+		{
+			if ( qbTransient )
+			{
+				Z_Free( pvAddress );
+			}
+		}
+		return 0;
+	}
+#endif
+
 	// Make sure we didn't encounter any read errors...
 	//size_t
+#ifdef JK2_MODE
+	if ( uiLoaded != sizeof(ulLoadedChid) + sizeof(uiLoadedLength) + sizeof(uiLoadedCksum) + (bBlockIsCompressed?sizeof(uiCompressedLength):0) + (bBlockIsCompressed?uiCompressedLength:iLength) + sizeof(uiLoadedMagic))
+#else
 	if ( uiLoaded != sizeof(ulLoadedChid) + sizeof(uiLoadedLength) + sizeof(uiLoadedCksum) + (bBlockIsCompressed?sizeof(uiCompressedLength):0) + (bBlockIsCompressed?uiCompressedLength:iLength))
+#endif
 	{
 		if (!qbSGReadIsTestOnly)
 		{
