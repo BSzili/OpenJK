@@ -410,7 +410,7 @@ static qboolean GLimp_StartDriverAndSetMode(int mode, qboolean fullscreen, qbool
 		{MGLCC_Windowed, !fullscreen},
 		{MGLCC_TextureBufferSize, 65536},
 		//{MGLCC_Buffers, 2},
-		{MGLCC_PixelDepth, colorBits},
+		{MGLCC_PixelDepth, (colorBits != 32) ? colorBits : 24}, // 32-bit contexts are not supported
 		{MGLCC_CloseGadget, GL_TRUE},
 		{MGLCC_SizeGadget, GL_TRUE},
 		{MGLCC_StencilBuffer, GL_TRUE},
@@ -532,7 +532,7 @@ void GLimp_Init(void)
 	if (!GLimp_StartDriverAndSetMode(r_mode->integer, (qboolean)r_fullscreen->integer, (qboolean)r_noborder->integer))
 	{
 		GLimp_Shutdown();
-		return;
+		Com_Error( ERR_FATAL, "GLimp_Init() - could not load OpenGL subsystem" );
 	}
 
 	glConfig.deviceSupportsGamma = qfalse;
