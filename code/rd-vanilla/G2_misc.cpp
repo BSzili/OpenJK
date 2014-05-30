@@ -1774,6 +1774,10 @@ void G2_SaveGhoul2Models(CGhoul2Info_v &ghoul2)
 	// is there anything to save?
 	if (!ghoul2.IsValid()||!ghoul2.size())
 	{
+#ifdef JK2_MODE
+		iGhoul2Size = 4;
+		ri.SG_Append(INT_ID('G','L','2','S'),&iGhoul2Size, sizeof(iGhoul2Size)); // for savegame compatibility
+#endif
 		ri.SG_Append(INT_ID('G','H','L','2'),&pGhoul2Data, 4);	//write out a zero buffer
 		return;
 	}
@@ -1849,6 +1853,9 @@ void G2_SaveGhoul2Models(CGhoul2Info_v &ghoul2)
 		}
 	}
 
+#ifdef JK2_MODE
+	ri.SG_Append(INT_ID('G','L','2','S'),&iGhoul2Size, sizeof(iGhoul2Size)); // for savegame compatibility
+#endif
 	ri.SG_Append(INT_ID('G','H','L','2'),pGhoul2Data, iGhoul2Size);
 	Z_Free(pGhoul2Data);
 }

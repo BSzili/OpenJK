@@ -863,6 +863,8 @@ static void ReadGEntities(qboolean qbAutosave)
 		//
 		{
 			char *pGhoul2Data = NULL;
+			int   iGhoul2Size = 0; // for savegame compatibility
+			gi.ReadFromSaveGame(INT_ID('G','L','2','S'), &iGhoul2Size, sizeof(iGhoul2Size), NULL);
 			gi.ReadFromSaveGame(INT_ID('G','H','L','2'), 0, 0, (void**)&pGhoul2Data);
 			gi.G2API_LoadGhoul2Models(pEnt->ghoul2, pGhoul2Data);	// if it's going to crash anywhere...   <g>
 			gi.Free(pGhoul2Data);
