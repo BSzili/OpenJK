@@ -40,9 +40,11 @@ This file is part of Jedi Academy.
 
 void		UI_LoadMenus(const char *menuFile, qboolean reset);
 
+#ifndef JK2_MODE
 extern vmCvar_t	ui_char_color_red;
 extern vmCvar_t	ui_char_color_green;
 extern vmCvar_t	ui_char_color_blue;
+#endif
 
 void *UI_Alloc( int size );
 
@@ -2604,6 +2606,7 @@ int GetCurrentFeederIndex(itemDef_t * item)
 	
 	else if (feederID == FEEDER_COLORCHOICES)
 	{
+#ifndef JK2_MODE
 		extern void	Item_RunScript(itemDef_t *item, const char *s);		//from ui_shared;
 		int currR, currG, currB, newR, newG, newB;
 		currR = Cvar_VariableIntegerValue( "ui_char_color_red");
@@ -2621,6 +2624,7 @@ int GetCurrentFeederIndex(itemDef_t * item)
 				return i;
 		}
 		return -1;
+#endif
 
 		
 
@@ -6535,6 +6539,7 @@ void Item_ListBox_Paint(itemDef_t *item)
 				image = DC->feederItemImage(item->special, i);
 				if (image) 
 				{
+#ifndef JK2_MODE
 					if (item->window.flags & WINDOW_PLAYERCOLOR) 
 					{
 						vec4_t	color;
@@ -6544,6 +6549,7 @@ void Item_ListBox_Paint(itemDef_t *item)
 						color[3] = 1;
 						ui.R_SetColor(color);
 					}
+#endif
 					DC->drawHandlePic(x+1, y+1, listPtr->elementWidth - 2, listPtr->elementHeight - 2, image);
 				}
 
@@ -8378,6 +8384,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp, float fadeCycle)
 	} 
 	else if (w->style == WINDOW_STYLE_SHADER) 
 	{
+#ifndef JK2_MODE
 		if (w->flags & WINDOW_PLAYERCOLOR) 
 		{
 			vec4_t	color;
@@ -8388,6 +8395,7 @@ void Window_Paint(Window *w, float fadeAmount, float fadeClamp, float fadeCycle)
 			ui.R_SetColor(color);
 		}
 		else if (w->flags & WINDOW_FORECOLORSET) 
+#endif
 		{
 			DC->setColor(w->foreColor);
 		}

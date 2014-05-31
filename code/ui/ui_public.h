@@ -108,11 +108,15 @@ typedef struct {
 
 	// =========== getting save game picture ===============
 	void	(*DrawStretchRaw) (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);
-	//qboolean(*SG_GetSaveImage)( const char *psPathlessBaseName, void *pvAddress );
+#ifdef JK2_MODE
+	qboolean(*SG_GetSaveImage)( const char *psPathlessBaseName, void *pvAddress );
+#endif
 	int		(*SG_GetSaveGameComment)(const char *psPathlessBaseName, char *sComment, char *sMapName);
 	qboolean (*SG_GameAllowedToSaveHere)(qboolean inCamera);
 	void (*SG_StoreSaveGameComment)(const char *sComment);
-	//byte *(*SCR_GetScreenshot)(qboolean *);
+#ifdef JK2_MODE
+	byte *(*SCR_GetScreenshot)(qboolean *);
+#endif
 
 	// =========== data shared with the client system =============
 

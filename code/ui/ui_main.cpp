@@ -35,14 +35,17 @@ USER INTERFACE MAIN
 
 #include "ui_shared.h"
 
+#ifndef JK2_MODE
 #include "../ghoul2/G2.h"
 
 #include "../game/bg_public.h"
 #include "../game/anims.h"
 extern stringID_table_t animTable [MAX_ANIMATIONS+1];
+#endif
 
 #include "../qcommon/stv_version.h"
 
+#ifndef JK2_MODE
 #include "../qcommon/q_shared.h"
 
 extern qboolean ItemParse_model_g2anim_go( itemDef_t *item, const char *animName );
@@ -53,6 +56,7 @@ extern qboolean UI_SaberSkinForSaber( const char *saberName, char *saberSkin );
 extern void UI_SaberAttachToChar( itemDef_t *item );
 
 extern qboolean PC_Script_Parse(const char **out);
+#endif
 
 #define LISTBUFSIZE 10240
 
@@ -73,7 +77,9 @@ static struct
 #define MAX_SAVELOADFILES	100
 #define MAX_SAVELOADNAME	32
 
-//byte screenShotBuf[SG_SCR_WIDTH * SG_SCR_HEIGHT * 4];
+#ifdef JK2_MODE
+byte screenShotBuf[SG_SCR_WIDTH * SG_SCR_HEIGHT * 4];
+#endif
 
 typedef struct 
 {
@@ -87,8 +93,10 @@ typedef struct
 static savedata_t s_savedata[MAX_SAVELOADFILES];
 void UI_SetActiveMenu( const char* menuname,const char *menuID );
 void ReadSaveDirectory (void);
+#ifndef JK2_MODE
 void Item_RunScript(itemDef_t *item, const char *s);
 qboolean Item_SetFocus(itemDef_t *item, float x, float y);
+#endif
 
 qboolean		Asset_Parse(char **buffer);
 menuDef_t		*Menus_FindByName(const char *p);
@@ -100,6 +108,7 @@ void			_UI_DrawSides(float x, float y, float w, float h, float size);
 void			UI_CheckVid1Data(const char *menuTo,const char *warningMenuName);
 void			UI_GetVideoSetup ( void );
 void			UI_UpdateVideoSetup ( void );
+#ifndef JK2_MODE
 static void		UI_UpdateCharacterCvars ( void );
 static void		UI_GetCharacterCvars ( void );
 static void		UI_UpdateSaberCvars ( void );
@@ -142,6 +151,7 @@ static void		UI_DemoSetForceLevels( void );
 static void		UI_RecordForceLevels( void );
 static void		UI_RecordWeapons( void );
 static void		UI_ResetCharacterListBoxes( void );
+#endif
 
 
 void		UI_LoadMenus(const char *menuFile, qboolean reset);
@@ -155,6 +165,7 @@ void			UI_AdjustSaveGameListBox( int currentLine );
 
 void			Menus_CloseByName(const char *p);
 
+#ifndef JK2_MODE
 // Movedata Sounds
 enum
 {
@@ -330,6 +341,7 @@ static datpadmovedata_t datapadMoveData[MD_MOVE_TITLE_MAX][MAX_MOVES] =
 { NULL, NULL, 0,	MDS_NONE },
 }
 };
+#endif
 
 
 static int gamecodetoui[] = {4,2,3,0,5,1,6};
@@ -351,6 +363,7 @@ typedef struct {
 vmCvar_t	ui_menuFiles;
 vmCvar_t	ui_hudFiles;
 
+#ifndef JK2_MODE
 vmCvar_t	ui_char_anim;
 vmCvar_t	ui_char_model;
 vmCvar_t	ui_char_skin_head;
@@ -365,6 +378,7 @@ vmCvar_t	ui_char_color_red;
 vmCvar_t	ui_char_color_green;
 vmCvar_t	ui_char_color_blue;
 vmCvar_t	ui_PrecacheModels;
+#endif
 
 static cvarTable_t cvarTable[] = 
 {
@@ -375,6 +389,7 @@ static cvarTable_t cvarTable[] =
 	{ &ui_hudFiles,				"cg_hudFiles",			"ui/jahud.txt",CVAR_ARCHIVE}, 
 #endif
 
+#ifndef JK2_MODE
 	{ &ui_char_anim,			"ui_char_anim",			"BOTH_WALK1",0}, 
 
 	{ &ui_char_model,			"ui_char_model",		"",0},	//these are filled in by the "g_*" versions on load
@@ -393,6 +408,7 @@ static cvarTable_t cvarTable[] =
 	{ &ui_char_color_blue,		"ui_char_color_blue",	"", 0}, 
 
 	{ &ui_PrecacheModels,		"ui_PrecacheModels",	"1", CVAR_ARCHIVE}, 
+#endif
 };
 
 #define FP_UPDATED_NONE -1
@@ -417,6 +433,7 @@ void _UI_Refresh( int realtime )
 	extern void SE_CheckForLanguageUpdates(void);
 	SE_CheckForLanguageUpdates();
 
+#ifndef JK2_MODE
 	if ( Menus_AnyFullScreenVisible() )
 	{//if not in full screen, don't mess with ghoul2
 		//rww - ghoul2 needs to know what time it is even if the client/server are not running
@@ -424,6 +441,7 @@ void _UI_Refresh( int realtime )
 		re.G2API_SetTime(realtime, 0);
 		re.G2API_SetTime(realtime, 1);
 	}
+#endif
 
 	uiInfo.uiDC.frameTime = realtime - uiInfo.uiDC.realTime;
 	uiInfo.uiDC.realTime = realtime;
@@ -614,6 +632,7 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 			return s_savedata[index].currentSaveFileDateTimeString;
 		}
 	}
+#ifndef JK2_MODE
 	else if (feederID == FEEDER_MOVES) 
 	{
 		return datapadMoveData[uiInfo.movesTitleIndex][index].title;
@@ -667,6 +686,7 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 			return uiInfo.playerSpecies[uiInfo.playerSpeciesIndex].ColorShader[index];
 		}
 	}
+#endif
 	else if (feederID == FEEDER_MODS) 
 	{
 		if (index >= 0 && index < uiInfo.modCount) 
@@ -687,6 +707,7 @@ const char *UI_FeederItemText(float feederID, int index, int column, qhandle_t *
 
 qhandle_t UI_FeederItemImage(float feederID, int index) 
 {
+#ifndef JK2_MODE
 	if (feederID == FEEDER_PLAYER_SKIN_HEAD) 
 	{
 		if (index >= 0 && index < uiInfo.playerSpecies[uiInfo.playerSpeciesIndex].SkinHeadCount) 
@@ -733,6 +754,7 @@ qhandle_t UI_FeederItemImage(float feederID, int index)
 		}
 	}
 */
+#endif
 	return 0;
 }
 
@@ -1025,6 +1047,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 			Cvar_Set( "cg_updatedDataPadForcePower3", "0" );
 			Cvar_Set( "cg_updatedDataPadObjective", "0" );
 		} 
+#ifndef JK2_MODE
 		else if (Q_stricmp(name, "closesabermenu") == 0) 
 		{
 			// if we're in the saber menu when creating a character, close this down
@@ -1136,10 +1159,12 @@ static qboolean UI_RunMenuScript ( const char **args )
 				}
 			}
 		}
+#endif
 		else if (Q_stricmp(name, "glCustom") == 0) 
 		{
 			Cvar_Set("ui_r_glCustom", "4");
 		} 
+#ifndef JK2_MODE
 		else if (Q_stricmp(name, "character") == 0) 
 		{
 			UI_UpdateCharacter( qfalse );
@@ -1448,6 +1473,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 		{
 			UI_UpdateFightingStyle();
 		}
+#endif
 		else if (Q_stricmp(name, "update") == 0) 
 		{
 			if (String_Parse(args, &name2)) 
@@ -1459,6 +1485,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 				Com_Printf("update missing cmd\n");
 			}
 		}
+#ifndef JK2_MODE
 		else if (Q_stricmp(name, "load_quick") == 0) 
 		{
 #ifdef JK2_MODE
@@ -1483,6 +1510,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 		{
 			UI_ResetCharacterListBoxes();
 		}
+#endif
 		else 
 		{
 			Com_Printf("unknown UI script %s\n", name);
@@ -1502,6 +1530,7 @@ static float UI_GetValue(int ownerDraw)
   return 0;
 }
 
+#ifndef JK2_MODE
 //Force Warnings
 enum
 {
@@ -1646,6 +1675,7 @@ static void UI_CalcForceStatus(void)
 		DC->startLocalSound(DC->registerSound(kyleForceStatusSounds[index], qfalse), CHAN_VOICE );
 	}
 }
+#endif
 
 /*
 =================
@@ -1697,16 +1727,17 @@ static void UI_StopCinematic(int handle)
 static void UI_HandleLoadSelection()
 {
 	Cvar_Set("ui_SelectionOK", va("%d",(s_savegame.currentLine < s_savegame.saveFileCnt)) );
+#ifndef JK2_MODE
 	if (s_savegame.currentLine >= s_savegame.saveFileCnt)
 		return;
-//	Cvar_Set("ui_gameDesc", s_savedata[s_savegame.currentLine].currentSaveFileComments );	// set comment 
+#else
+	Cvar_Set("ui_gameDesc", s_savedata[s_savegame.currentLine].currentSaveFileComments );	// set comment 
 
-/*	if (!ui.SG_GetSaveImage(s_savedata[s_savegame.currentLine].currentSaveFileName, &screenShotBuf))
->>>>>>> 1.30
+	if (!ui.SG_GetSaveImage(s_savedata[s_savegame.currentLine].currentSaveFileName, &screenShotBuf))
 	{
 		memset( screenShotBuf,0,(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4)); 
 	}
-*/
+#endif
 }
 
 /*
@@ -1726,6 +1757,7 @@ static int UI_FeederCount(float feederID)
 		}
 		return s_savegame.saveFileCnt;
 	} 
+#ifndef JK2_MODE
 	// count number of moves for the current title
 	else if (feederID == FEEDER_MOVES) 
 	{
@@ -1745,10 +1777,12 @@ static int UI_FeederCount(float feederID)
 	{
 		return (MD_MOVE_TITLE_MAX);
 	}
+#endif
 	else if (feederID == FEEDER_MODS) 
 	{
 		return uiInfo.modCount;
 	} 
+#ifndef JK2_MODE
 	else if (feederID == FEEDER_LANGUAGES) 
 	{
 		return uiInfo.languageCount;
@@ -1773,6 +1807,7 @@ static int UI_FeederCount(float feederID)
 	{
 		return uiInfo.playerSpecies[uiInfo.playerSpeciesIndex].ColorCount;
 	}
+#endif
 
 	return 0;
 }
@@ -1789,6 +1824,7 @@ static void UI_FeederSelection(float feederID, int index, itemDef_t *item)
 		s_savegame.currentLine = index;
 		UI_HandleLoadSelection();
 	} 
+#ifndef JK2_MODE
 	else if (feederID == FEEDER_MOVES) 
 	{
 		itemDef_t *item;
@@ -1895,10 +1931,12 @@ static void UI_FeederSelection(float feederID, int index, itemDef_t *item)
 			}
 		}
 	}
+#endif
 	else if (feederID == FEEDER_MODS) 
 	{
 		uiInfo.modIndex = index;
 	} 
+#ifndef JK2_MODE
 	else if (feederID == FEEDER_PLAYER_SPECIES) 
 	{
 		uiInfo.playerSpeciesIndex = index;
@@ -1936,6 +1974,7 @@ extern void	Item_RunScript(itemDef_t *item, const char *s);		//from ui_shared;
 			Item_RunScript(item, uiInfo.playerSpecies[uiInfo.playerSpeciesIndex].ColorActionText[index]);
 		}
 	}
+#endif
 /*	else if (feederID == FEEDER_CINEMATICS) 
 	{
 		uiInfo.movieIndex = index;
@@ -1993,6 +2032,7 @@ static qboolean UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, 
   return qfalse;
 }
 
+#ifndef JK2_MODE
 //unfortunately we cannot rely on any game/cgame module code to do our animation stuff,
 //because the ui can be loaded while the game/cgame are not loaded. So we're going to recreate what we need here.
 #undef MAX_ANIM_FILES
@@ -2435,6 +2475,7 @@ static void UI_BuildPlayerModel_List( qboolean inGameLoad )
 	}	
 
 }
+#endif
 
 /*
 =================
@@ -2521,6 +2562,7 @@ void _UI_Init( qboolean inGameLoad )
 	uiInfo.uiDC.feederItemText		= &UI_FeederItemText;
 	uiInfo.uiDC.ownerDrawHandleKey	= &UI_OwnerDrawHandleKey;
 
+#ifndef JK2_MODE
 	uiInfo.uiDC.registerSkin		= re.RegisterSkin;
 
 	uiInfo.uiDC.g2_SetSkin = re.G2API_SetSkin;
@@ -2535,6 +2577,7 @@ void _UI_Init( qboolean inGameLoad )
 	uiInfo.uiDC.g2hilev_SetAnim = UI_G2SetAnim;
 
 	UI_BuildPlayerModel_List(inGameLoad);
+#endif
 
 	String_Init();
 
@@ -2577,6 +2620,7 @@ void _UI_Init( qboolean inGameLoad )
 	Cvar_Set("cg_endcredits", "0");	// Reset value
 	Cvar_Set("ui_missionfailed","0"); // reset
 
+#ifndef JK2_MODE
 	uiInfo.forcePowerUpdated = FP_UPDATED_NONE;
 	uiInfo.selectedWeapon1 = NOWEAPON;
 	uiInfo.selectedWeapon2 = NOWEAPON;
@@ -2584,7 +2628,7 @@ void _UI_Init( qboolean inGameLoad )
 
 	uiInfo.uiDC.Assets.nullSound = trap_S_RegisterSound("sound/null", qfalse);
 
-#ifndef JK2_MODE
+//#ifndef JK2_MODE
 	//FIXME hack to prevent error in jk2 by disabling
 	trap_S_RegisterSound("sound/interface/weapon_deselect", qfalse);
 #endif
@@ -3223,6 +3267,7 @@ qboolean Asset_Parse(char **buffer)
 			continue;
 		}
 
+#ifndef JK2_MODE
 		// precaching various sound files used in the menus
 		if (Q_stricmp(token, "precacheSound") == 0)
 		{
@@ -3242,6 +3287,7 @@ qboolean Asset_Parse(char **buffer)
 			}
 			continue;
 		}
+#endif
 	}
 
 	PC_ParseWarning(va("Invalid keyword '%s'",token));
@@ -4069,6 +4115,7 @@ void UI_GetVideoSetup ( void )
 	Cvar_Set ( "ui_r_modified", "0" );
 }
 
+#ifndef JK2_MODE
 static void UI_SetSexandSoundForModel(const char* char_model)
 {
 	int			f,i;
@@ -6106,6 +6153,7 @@ static void UI_UpdateSaberHilt( qboolean secondSaber )
 		}
 	}
 }
+#endif
 
 /*
 static void UI_UpdateSaberColor( qboolean secondSaber )
@@ -6258,7 +6306,9 @@ void ReadSaveDirectory (void)
 	s_savegame.saveFileCnt = 0;
 	Cvar_Set("ui_gameDesc", "" );	// Blank out comment 
 	Cvar_Set("ui_SelectionOK", "0" );
-	//memset( screenShotBuf,0,(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4)); //blank out sshot
+#ifdef JK2_MODE
+	memset( screenShotBuf,0,(SG_SCR_WIDTH * SG_SCR_HEIGHT * 4)); //blank out sshot
+#endif
 
 
 	// Get everything in saves directory
