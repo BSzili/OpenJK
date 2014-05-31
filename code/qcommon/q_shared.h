@@ -1418,12 +1418,14 @@ typedef enum
 	FP_SABERTHROW,
 	FP_SABER_DEFENSE,
 	FP_SABER_OFFENSE,
+#ifndef JK2_MODE
 	//new Jedi Academy powers
 	FP_RAGE,//duration - speed, invincibility and extra damage for short period, drains your health and leaves you weak and slow afterwards.
 	FP_PROTECT,//duration - protect against physical/energy (level 1 stops blaster/energy bolts, level 2 stops projectiles, level 3 protects against explosions)
 	FP_ABSORB,//duration - protect against dark force powers (grip, lightning, drain - maybe push/pull, too?)
 	FP_DRAIN,//hold/duration - drain force power for health
 	FP_SEE,//duration - detect/see hidden enemies
+#endif
 	NUM_FORCE_POWERS
 } forcePowers_t;
 
@@ -2043,6 +2045,7 @@ typedef struct playerState_s {
 	int			lastStationary;	//last time you were on the ground
 	int			weaponShotCount;
 
+#ifndef JK2_MODE
 	//FIXME: maybe allocate all these structures (saber, force powers, vehicles) 
 	//			or descend them as classes - so not every client has all this info
 	saberInfo_t	saber[MAX_SABERS];
@@ -2166,9 +2169,12 @@ typedef struct playerState_s {
 					}
 					return parryBonus;
 				};
+#endif
 
 	short		saberMove;
+#ifndef JK2_MODE
 	short		saberMoveNext;
+#endif
 	short		saberBounceMove;
 	short		saberBlocking;
 	short		saberBlocked;
@@ -2189,9 +2195,10 @@ typedef struct playerState_s {
 	int			saberAttackChainCount;
 	int			saberLockTime;
 	int			saberLockEnemy;
-	int			saberStylesKnown;
 #ifdef JK2_MODE
 	char		*saberModel;
+#else
+	int			saberStylesKnown;
 #endif
 
 	int			forcePowersKnown;
@@ -2200,17 +2207,22 @@ typedef struct playerState_s {
 	int			forcePower;
 	int			forcePowerMax;
 	int			forcePowerRegenDebounceTime;
+#ifndef JK2_MODE
 	int			forcePowerRegenRate;				//default is 100ms
 	int			forcePowerRegenAmount;				//default is 1
+#endif
 	int			forcePowerLevel[NUM_FORCE_POWERS];		//so we know the max forceJump power you have
 	float		forceJumpZStart;					//So when you land, you don't get hurt as much
 	float		forceJumpCharge;					//you're current forceJump charge-up level, increases the longer you hold the force jump button down
 	int			forceGripEntityNum;					//what entity I'm gripping
 	vec3_t		forceGripOrg;						//where the gripped ent should be lifted to
+#ifndef JK2_MODE
 	int			forceDrainEntityNum;				//what entity I'm draining
 	vec3_t		forceDrainOrg;						//where the drained ent should be lifted to
+#endif
 	int			forceHealCount;						//how many points of force heal have been applied so far
 	
+#ifndef JK2_MODE
 	//new Jedi Academy force powers
 	int			forceAllowDeactivateTime;
 	int			forceRageDrainTime;
@@ -2221,6 +2233,7 @@ typedef struct playerState_s {
 	int			pullAttackEntNum;
 	int			pullAttackTime;
 	int			lastKickedEntNum;
+#endif
 
 	int			taunting;							//replaced BUTTON_GESTURE
 
@@ -2230,6 +2243,7 @@ typedef struct playerState_s {
 	float		waterheight;						//exactly what the z org of the water is (will be +4 above if under water, -4 below if not in water)
 	waterHeightLevel_t	waterHeightLevel;					//how high it really is
 
+#ifndef JK2_MODE
 	//testing IK grabbing
 	qboolean	ikStatus;		//for IK
 	int			heldClient;		//for IK, who I'm grabbing, if anyone
@@ -2244,6 +2258,7 @@ typedef struct playerState_s {
 	//NOTE: not really used in SP, just for Fighter Vehicle damage stuff
 	int			brokenLimbs;
 	int			electrifyTime;
+#endif
 } playerState_t;
 
 
@@ -2297,7 +2312,9 @@ typedef struct usercmd_s {
 	int		buttons;
 	byte	weapon;
 	int		angles[3];
+#ifndef JK2_MODE
 	byte	generic_cmd;
+#endif
 	signed char	forwardmove, rightmove, upmove;
 } usercmd_t;
 
@@ -2384,13 +2401,13 @@ typedef struct entityState_s {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!
 
 #ifdef JK2_MODE
 	int		vehicleModel;	// For overriding your playermodel with a drivable vehicle
-#endif
-
+#else
 	//int		vehicleIndex;		// What kind of vehicle you're driving
 	vec3_t	vehicleAngles;		// 
 	int		vehicleArmor;		// current armor of your vehicle (explodes if drops to 0)
 	// 0 if not in a vehicle, otherwise the client number.
 	int m_iVehicleNum;
+#endif
 
 /*
 Ghoul2 Insert Start
@@ -2402,7 +2419,9 @@ Ghoul2 Insert Start
 Ghoul2 Insert End
 */
 
+#ifndef JK2_MODE
 	qboolean	isPortalEnt;
+#endif
 
 } entityState_t;
 

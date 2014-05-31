@@ -86,9 +86,23 @@ static void IN_UseGivenForce(void)
 	}
 
 	switch(forceNum) {
+#ifndef JK2_MODE
 	case FP_DRAIN:
 		genCmdNum = GENCMD_FORCE_DRAIN;
 		break;
+	case FP_RAGE:
+		genCmdNum = GENCMD_FORCE_RAGE;
+		break;
+	case FP_PROTECT:
+		genCmdNum = GENCMD_FORCE_PROTECT;
+		break;
+	case FP_ABSORB:
+		genCmdNum = GENCMD_FORCE_ABSORB;
+		break;
+	case FP_SEE:
+		genCmdNum = GENCMD_FORCE_SEEING;
+		break;
+#endif		
 	case FP_PUSH:
 		genCmdNum = GENCMD_FORCE_THROW;
 		break;
@@ -106,18 +120,6 @@ static void IN_UseGivenForce(void)
 		break;
 	case FP_LIGHTNING:
 		genCmdNum = GENCMD_FORCE_LIGHTNING;
-		break;
-	case FP_RAGE:
-		genCmdNum = GENCMD_FORCE_RAGE;
-		break;
-	case FP_PROTECT:
-		genCmdNum = GENCMD_FORCE_PROTECT;
-		break;
-	case FP_ABSORB:
-		genCmdNum = GENCMD_FORCE_ABSORB;
-		break;
-	case FP_SEE:
-		genCmdNum = GENCMD_FORCE_SEEING;
 		break;
 	case FP_HEAL:
 		genCmdNum = GENCMD_FORCE_HEAL;
@@ -653,6 +655,7 @@ void CL_FinishMove( usercmd_t *cmd ) {
 	// copy the state that the cgame is currently sending
 	cmd->weapon = cl.cgameUserCmdValue;
 
+#ifndef JK2_MODE
 	if (cl.gcmdSendValue)
 	{
 		cmd->generic_cmd = cl.gcmdValue;
@@ -662,6 +665,7 @@ void CL_FinishMove( usercmd_t *cmd ) {
 	{
 		cmd->generic_cmd = 0;
 	}
+#endif
 
 	// send the current server time so the amount of movement
 	// can be determined without allowing cheating
