@@ -17,7 +17,7 @@
 #define unsetenv(x)
 #define dirname(x) x
 #define basename(x) x
-#define realpath(x,y) ((char *)x)
+#define realpath(x,y) strdup((char *)x)
 #endif
 #ifdef __amigaos4__
 #define unsetenv(x)
