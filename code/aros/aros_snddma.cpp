@@ -172,7 +172,7 @@ qboolean SNDDMA_Init(void)
 
 	AHIio->ahir_Version = 4;
 
-	if ((AHIDevice = OpenDevice((STRPTR)"ahi.device", AHI_NO_UNIT, (struct IORequest *)AHIio, 0)) != 0)
+	if ((AHIDevice = OpenDevice((STRPTR)AHINAME, AHI_NO_UNIT, (struct IORequest *)AHIio, 0)) != 0)
 	{
 		SNDDMA_Shutdown();
 		Com_Printf("Can't open ahi.device version 4\n");
