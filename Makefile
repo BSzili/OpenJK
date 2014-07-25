@@ -58,7 +58,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 openjk_sp: CFLAGS += -noixemul
 openjk_sp: CXXFLAGS += -noixemul
-openjk_sp: LDFLAGS += -noixemul
+#openjk_sp: LDFLAGS += -noixemul
+openjk_sp: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -86,7 +87,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 base/jagame$(ARCH).so: CFLAGS += -noixemul
 base/jagame$(ARCH).so: CXXFLAGS += -noixemul
-base/jagame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+#base/jagame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+base/jagame$(ARCH).so: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -117,7 +119,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 openjk_mp: CFLAGS += -noixemul
 openjk_mp: CXXFLAGS += -noixemul
-openjk_mp: LDFLAGS += -noixemul
+#openjk_mp: LDFLAGS += -noixemul
+openjk_mp: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -141,7 +144,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 base/cgame$(ARCH).so: CFLAGS += -noixemul
 base/cgame$(ARCH).so: CXXFLAGS += -noixemul
-base/cgame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+#base/cgame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+base/cgame$(ARCH).so: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -165,7 +169,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 base/jampgame$(ARCH).so: CFLAGS += -noixemul
 base/jampgame$(ARCH).so: CXXFLAGS += -noixemul
-base/jampgame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+#base/jampgame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+base/jampgame$(ARCH).so: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -189,7 +194,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 base/ui$(ARCH).so: CFLAGS += -noixemul
 base/ui$(ARCH).so: CXXFLAGS += -noixemul
-base/ui$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+#base/ui$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+base/ui$(ARCH).so: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -220,7 +226,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 openjo_sp: CFLAGS += -noixemul
 openjo_sp: CXXFLAGS += -noixemul
-openjo_sp: LDFLAGS += -noixemul
+#openjo_sp: LDFLAGS += -noixemul
+openjo_sp: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -248,7 +255,8 @@ endif
 ifeq ($(OSTYPE), MorphOS)
 base/jospgame$(ARCH).so: CFLAGS += -noixemul
 base/jospgame$(ARCH).so: CXXFLAGS += -noixemul
-base/jospgame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+#base/jospgame$(ARCH).so: LDFLAGS += -noixemul -nostartfiles
+base/jospgame$(ARCH).so: LDFLAGS += -noixemul -ldll
 endif
 
 
@@ -641,8 +649,10 @@ GAME_JASP_OBJS_ += \
 endif
 
 ifeq ($(OSTYPE), MorphOS)
+#GAME_JASP_OBJS_ += \
+#	code/aros/libnix_so.o
 GAME_JASP_OBJS_ += \
-	code/aros/libnix_so.o
+	code/aros/aros_exports.o
 endif
 
 
@@ -796,8 +806,10 @@ GAME_JOSP_OBJS_ += \
 endif
 
 ifeq ($(OSTYPE), MorphOS)
+#GAME_JOSP_OBJS_ += \
+#	code/aros/libnix_so.o
 GAME_JOSP_OBJS_ += \
-	code/aros/libnix_so.o
+	code/aros/aros_exports.o
 endif
 
 
@@ -1031,8 +1043,10 @@ CGAME_JAMP_OBJS_ += \
 endif
 
 ifeq ($(OSTYPE), MorphOS)
+#CGAME_JAMP_OBJS_ += \
+#	code/aros/libnix_so.o
 CGAME_JAMP_OBJS_ += \
-	code/aros/libnix_so.o
+	codemp/aros/aros_exports.o
 endif
 
 
@@ -1131,11 +1145,12 @@ GAME_JAMP_OBJS_ += \
 endif
 
 ifeq ($(OSTYPE), MorphOS)
+#GAME_JAMP_OBJS_ += \
+#	code/aros/libnix_so.o
 GAME_JAMP_OBJS_ += \
-	code/aros/libnix_so.o
+	codemp/aros/aros_exports.o
 endif
 
-#set(MPUIDefines ${MPSharedDefines} "_UI")
 
 UI_JAMP_OBJS_ = \
 	codemp/game/bg_misc.o \
@@ -1160,8 +1175,10 @@ UI_JAMP_OBJS_ += \
 endif
 
 ifeq ($(OSTYPE), MorphOS)
+#UI_JAMP_OBJS_ += \
+#	code/aros/libnix_so.o
 UI_JAMP_OBJS_ += \
-	code/aros/libnix_so.o
+	codemp/aros/aros_exports.o
 endif
 
 
@@ -1201,7 +1218,7 @@ openjk_sp: $(CLIENT_JASP_OBJS)
 
 base/jagame$(ARCH).so: $(GAME_JASP_OBJS)
 	$(MKDIR) $(@D)
-	$(CXX) $^ $(LDFLAGS) -o $@	
+	$(CXX) $^ $(LDFLAGS) -o $@
 
 openjo_sp: $(CLIENT_JOSP_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
@@ -1216,12 +1233,12 @@ openjk_mp: $(CLIENT_JAMP_OBJS)
 
 base/cgame$(ARCH).so: $(CGAME_JAMP_OBJS)
 	$(MKDIR) $(@D)
-	$(CXX) $^ $(LDFLAGS) -o $@	
+	$(CXX) $^ $(LDFLAGS) -o $@
 
 base/jampgame$(ARCH).so: $(GAME_JAMP_OBJS)
 	$(MKDIR) $(@D)
-	$(CXX) $^ $(LDFLAGS) -o $@	
-	
+	$(CXX) $^ $(LDFLAGS) -o $@
+
 base/ui$(ARCH).so: $(UI_JAMP_OBJS)
 	$(MKDIR) $(@D)
-	$(CXX) $^ $(LDFLAGS) -o $@	
+	$(CXX) $^ $(LDFLAGS) -o $@

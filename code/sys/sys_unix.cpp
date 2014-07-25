@@ -507,13 +507,13 @@ void Sys_ShowConsole( int visLevel, qboolean quitOnClose )
 }
 
 void Sys_Exit( int ex ) {
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	if (DynLoadBase)
 	{
 		CloseLibrary(DynLoadBase);
 		DynLoadBase = NULL;
 	}
-#endif
+#endif*/
 #ifdef NDEBUG // regular behavior
   // We can't do this
   //  as long as GL DLL's keep installing with atexit...

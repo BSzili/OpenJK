@@ -8,13 +8,13 @@
 #ifdef __MORPHOS__
 #include <proto/exec.h>
 #include <locale.h>
-struct Library *DynLoadBase = NULL;
+//struct Library *DynLoadBase = NULL;
 #endif
 #include "qcommon/q_shared.h"
 #include "qcommon/qcommon.h"
 
 #if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
-static const char * __attribute__((used)) version = "$VER: OpenJK MP 1.0 (23.3.2014) " OS_STRING " port by Szilárd Biró";
+static const char * __attribute__((used)) version = "$VER: OpenJK MP 1.2 (25.7.2014) " OS_STRING " port by Szilárd Biró";
 #ifdef __amigaos4__
 static const char * __attribute__((used)) stack = "$STACK: 1048576";
 #else
@@ -145,13 +145,13 @@ void Sys_Exit( int ex ) {
 #if !defined(DEDICATED) && !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 	SDL_Quit( );
 #endif
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	if (DynLoadBase)
 	{
 		CloseLibrary(DynLoadBase);
 		DynLoadBase = NULL;
 	}
-#endif
+#endif*/
 
 #ifdef NDEBUG // regular behavior
     // We can't do this
@@ -208,14 +208,14 @@ void Sys_UnloadDll( void *dllHandle )
 		return;
 	}
 
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	{
 		void (*morphos_so_deinit)(void);
 		morphos_so_deinit = (void (*)())Sys_LoadFunction(dllHandle, "morphos_so_deinit");
 		if (morphos_so_deinit)
 			morphos_so_deinit();
 	}
-#endif
+#endif*/
 
 	Sys_UnloadLibrary(dllHandle);
 }
@@ -321,10 +321,10 @@ void *Sys_LoadLegacyGameDll( const char *name, intptr_t (QDECL **vmMain)(int, ..
 #endif
 	char	*fn;
 	char	filename[MAX_OSPATH];
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	int  (*morphos_so_init)(void);
 	void (*morphos_so_deinit)(void);
-#endif
+#endif*/
 
 	Com_sprintf (filename, sizeof(filename), "%s" ARCH_STRING DLL_EXT, name);
 
@@ -415,7 +415,7 @@ void *Sys_LoadLegacyGameDll( const char *name, intptr_t (QDECL **vmMain)(int, ..
 		}
 	}
 
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	morphos_so_init = (int (*)())Sys_LoadFunction(libHandle, "morphos_so_init");
 	morphos_so_deinit = (void (*)())Sys_LoadFunction(libHandle, "morphos_so_deinit");
 
@@ -425,16 +425,16 @@ void *Sys_LoadLegacyGameDll( const char *name, intptr_t (QDECL **vmMain)(int, ..
 		Sys_UnloadLibrary( libHandle );
 		return NULL;
 	}
-#endif
+#endif*/
 
 	dllEntry = ( void (QDECL *)( intptr_t (QDECL *)( intptr_t, ... ) ) )Sys_LoadFunction( libHandle, "dllEntry" );
 	*vmMain = (intptr_t (QDECL *)(int,...))Sys_LoadFunction( libHandle, "vmMain" );
 	if ( !*vmMain || !dllEntry ) {
 		Com_Printf ( "Sys_LoadGameDll(%s) failed to find vmMain function:\n\"%s\" !\n", name, Sys_LibraryError() );
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 		if (morphos_so_deinit)
 			morphos_so_deinit();
-#endif
+#endif*/
 		Sys_UnloadLibrary( libHandle );
 		return NULL;
 	}
@@ -457,10 +457,10 @@ void *Sys_LoadGameDll( const char *name, void *(QDECL **moduleAPI)(int, ...) )
 #endif
 	char	*fn;
 	char	filename[MAX_OSPATH];
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	int  (*morphos_so_init)(void);
 	void (*morphos_so_deinit)(void);
-#endif
+#endif*/
 
 	Com_sprintf (filename, sizeof(filename), "%s" ARCH_STRING DLL_EXT, name);
 
@@ -551,7 +551,7 @@ void *Sys_LoadGameDll( const char *name, void *(QDECL **moduleAPI)(int, ...) )
 		}
 	}
 
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 	morphos_so_init = (int (*)())Sys_LoadFunction(libHandle, "morphos_so_init");
 	morphos_so_deinit = (void (*)())Sys_LoadFunction(libHandle, "morphos_so_deinit");
 
@@ -561,15 +561,15 @@ void *Sys_LoadGameDll( const char *name, void *(QDECL **moduleAPI)(int, ...) )
 		Sys_UnloadLibrary( libHandle );
 		return NULL;
 	}
-#endif
+#endif*/
 
 	*moduleAPI = (void *(QDECL *)(int,...))Sys_LoadFunction( libHandle, "GetModuleAPI" );
 	if ( !*moduleAPI ) {
 		Com_Printf ( "Sys_LoadGameDll(%s) failed to find GetModuleAPI function:\n\"%s\" !\n", name, Sys_LibraryError() );
-#ifdef __MORPHOS__
+/*#ifdef __MORPHOS__
 		if (morphos_so_deinit)
 			morphos_so_deinit();
-#endif
+#endif*/
 		Sys_UnloadLibrary( libHandle );
 		return NULL;
 	}
@@ -661,7 +661,7 @@ int main ( int argc, char* argv[] )
 	// don't let locales with decimal comma screw up the string to float conversions
 	setlocale(LC_NUMERIC, "C");
 
-	DynLoadBase = OpenLibrary("dynload.library", 51);
+	/*DynLoadBase = OpenLibrary("dynload.library", 51);
 
 	if (DynLoadBase && DynLoadBase->lib_Revision < 3)
 	{
@@ -673,7 +673,7 @@ int main ( int argc, char* argv[] )
 	{
 		printf("Unable to open dynload.library version 51.3 or newer\n");
 		Sys_Exit(1);
-	}
+	}*/
 #endif
 
 	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
