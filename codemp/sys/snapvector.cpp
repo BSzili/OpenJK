@@ -3,7 +3,37 @@
 # include <float.h>
 # pragma fenv_access (on)
 #elif defined(__amigaos4__)
-#warning How to do this with newlib?
+// from glibc 2.19
+typedef enum { FE_TONEAREST = 0, FE_TOWARDZERO, FE_UPWARD, FE_DOWNWARD } eRoundType;
+static inline int fegetround(void)
+{
+	int result;
+	asm volatile("mcrfs 7,7\n\t"
+		"mfcr	%0" : "=r"(result) : : "cr7");
+	return result & 3;
+}
+
+static inline int fesetround(int round)
+{
+	if ((unsigned int)round < 2)
+	{
+		asm volatile("mtfsb0 30");
+		if ((unsigned int)round == 0)
+			asm volatile("mtfsb0 31");
+		else
+			asm volatile("mtfsb1 31");
+	}
+	else
+	{
+		asm volatile ("mtfsb1 30");
+		if ((unsigned int)round == 2)
+			asm volatile("mtfsb0 31");
+		else
+			asm volatile("mtfsb1 31");
+	}
+
+	return 0;
+}
 #else
 # include <fenv.h>
 #endif
@@ -32,17 +62,13 @@ void Sys_SnapVector(float *v)
 	_controlfp_s(&newcontrol, oldcontrol, _MCW_RC);
 #else
 	// pure C99
-#ifndef __amigaos4__
 	int oldround = fegetround();
 	fesetround(FE_TONEAREST);
-#endif
 
 	v[0] = nearbyintf(v[0]);
 	v[1] = nearbyintf(v[1]);
 	v[2] = nearbyintf(v[2]);
 
-#ifndef __amigaos4__
 	fesetround(oldround);
-#endif
 #endif
 }
