@@ -546,6 +546,10 @@ void GLimp_Init(void)
 	glConfig.version_string = (const char *)qglGetString(GL_VERSION);
 	glConfig.extensions_string = (const char *)qglGetString(GL_EXTENSIONS);
 
+#ifndef _JK2EXE
+	glConfigExt.originalExtensionString = glConfig.extensions_string;
+#endif
+
 	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &glConfig.maxTextureSize);
 
 	GLimp_InitExtensions();
