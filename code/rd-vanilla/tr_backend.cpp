@@ -524,7 +524,13 @@ static void RB_BeginDrawingView (void) {
 
 	if (clearBits)
 	{
+#ifdef __MORPHOS__
+		qglDisable( GL_TEXTURE_2D );
+#endif
 		qglClear( clearBits );
+#ifdef __MORPHOS__
+		qglEnable( GL_TEXTURE_2D );
+#endif
 	}
 
 	if ( ( backEnd.refdef.rdflags & RDF_HYPERSPACE ) )
@@ -1338,14 +1344,26 @@ const void	*RB_DrawBuffer( const void *data ) {
 		const fog_t		*fog = &tr.world->fogs[tr.world->numfogs];
 
 		qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
+#ifdef __MORPHOS__
+		qglDisable( GL_TEXTURE_2D );
+#endif
 		qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#ifdef __MORPHOS__
+		qglEnable( GL_TEXTURE_2D );
+#endif
 	}
 	else if (!( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && tr.world && tr.world->globalFog != -1 && tr.sceneCount)//don't clear during menus, wait for real scene
 	{
 		const fog_t		*fog = &tr.world->fogs[tr.world->globalFog];
 
 		qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
+#ifdef __MORPHOS__
+		qglDisable( GL_TEXTURE_2D );
+#endif
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+#ifdef __MORPHOS__
+		qglEnable( GL_TEXTURE_2D );
+#endif
 	}
 	else if ( r_clear->integer ) 
 	{	// clear screen for debugging
