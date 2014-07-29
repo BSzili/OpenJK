@@ -2616,6 +2616,10 @@ static qboolean ParseShader( const char **text )
 				continue;
 			}
 			shader.fogParms->depthForOpaque = atof( token );
+#ifdef __MORPHOS__
+			if ( !Q_stricmp( shader.name, "textures/mp/hoth_ctf_fog" ) /*&& r_drawfog->integer != 2*/ )
+				shader.fogParms->depthForOpaque = 3200.0f;
+#endif
 
 			// skip any old gradient directions
 			Shader_SkipRestOfLine( text );
