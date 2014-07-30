@@ -197,6 +197,7 @@ static void GLimp_InitExtensions( void )
 
 	// GL_EXT_texture_env_add
 	glConfig.textureEnvAddAvailable = qfalse;
+#ifndef __MORPHOS__
 	if ( GL_CheckForExtension( "EXT_texture_env_add" ) )
 	{
 		if ( r_ext_texture_env_add->integer )
@@ -211,6 +212,7 @@ static void GLimp_InitExtensions( void )
 		}
 	}
 	else
+#endif
 	{
 		Com_Printf ("...GL_EXT_texture_env_add not found\n" );
 	}
