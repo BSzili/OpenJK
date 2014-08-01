@@ -24,7 +24,9 @@
 #include "../qcommon/qcommon.h"
 #include "sys_local.h"
 
+#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(__amigaos4__)
 #include <SDL.h>
+#endif
 
 #define	MAX_QUED_EVENTS		256
 #define	MASK_QUED_EVENTS	( MAX_QUED_EVENTS - 1 )
@@ -81,6 +83,9 @@ Sys_GetClipboardData
 ==================
 */
 char *Sys_GetClipboardData(void) {
+#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
+	return NULL;
+#else
 	if ( !SDL_HasClipboardText() )
 		return NULL;
 
@@ -92,6 +97,7 @@ char *Sys_GetClipboardData(void) {
 
 	SDL_free( cbText );
 	return buf;
+#endif
 }
 
 /*

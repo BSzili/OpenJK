@@ -949,6 +949,7 @@ CLIENT_MP_OBJS_ = \
 	codemp/rd-vanilla/G2_misc.o \
 	codemp/rd-vanilla/G2_surfaces.o \
 	codemp/rd-vanilla/tr_backend.o \
+	codemp/rd-vanilla/tr_arb.o \
 	codemp/rd-vanilla/tr_bsp.o \
 	codemp/rd-vanilla/tr_cmds.o \
 	codemp/rd-vanilla/tr_curve.o \
