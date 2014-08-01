@@ -825,7 +825,7 @@ static qboolean UI_RunMenuScript ( const char **args )
 		}
 		else if (Q_stricmp(name, "saveControls") == 0) 
 		{
-			Controls_SetConfig(qtrue);
+			Controls_SetConfig();
 		} 
 		else if (Q_stricmp(name, "loadControls") == 0) 
 		{
@@ -4353,7 +4353,7 @@ static void UI_InitAllocForcePowers ( const char *forceName )
 	if (item)
 	{
 		char itemGraphic[128];
-		Com_sprintf (itemGraphic, sizeof(itemGraphic), "gfx/menus/hex_pattern_%d",forcelevel == 4 ? 3 : forcelevel);
+		Com_sprintf (itemGraphic, sizeof(itemGraphic), "gfx/menus/hex_pattern_%d",forcelevel >= 4 ? 3 : forcelevel);
 		item->window.background = ui.R_RegisterShaderNoMip(itemGraphic);
 
 		// If maxed out on power - don't allow update
@@ -4469,11 +4469,11 @@ static void UI_SetHexPicLevel( const menuDef_t	*menu,const int forcePowerI,const
 		char itemGraphic[128];
 		if (goldFlag)
 		{
-			Com_sprintf (itemGraphic, sizeof(itemGraphic), "gfx/menus/hex_pattern_%d_gold",powerLevel == 4 ? 3 : powerLevel);
+			Com_sprintf (itemGraphic, sizeof(itemGraphic), "gfx/menus/hex_pattern_%d_gold",powerLevel >= 4 ? 3 : powerLevel);
 		}
 		else
 		{
-			Com_sprintf (itemGraphic, sizeof(itemGraphic),  "gfx/menus/hex_pattern_%d",powerLevel == 4 ? 3 : powerLevel);
+			Com_sprintf (itemGraphic, sizeof(itemGraphic),  "gfx/menus/hex_pattern_%d",powerLevel >= 4 ? 3 : powerLevel);
 		}
 
 		item->window.background = ui.R_RegisterShaderNoMip(itemGraphic);
@@ -6179,6 +6179,7 @@ UI_ResetDefaults
 void UI_ResetDefaults( void )
 {
 	ui.Cmd_ExecuteText( EXEC_APPEND, "cvar_restart\n");
+	Controls_SetDefaults();
 	ui.Cmd_ExecuteText( EXEC_APPEND, "exec default.cfg\n");
 	ui.Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
 }

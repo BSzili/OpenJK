@@ -986,7 +986,7 @@ void GfxInfo_f( void )
 		else
 			ri.Printf( PRINT_ALL, "%f)\n", glConfig.maxTextureFilterAnisotropy);
 	}
-	ri.Printf( PRINT_ALL, "Dynamic Glow: %s\n", enablestrings[r_DynamicGlow->integer] );
+	ri.Printf( PRINT_ALL, "Dynamic Glow: %s\n", enablestrings[r_DynamicGlow->integer ? 1 : 0] );
 	if (g_bTextureRectangleHack) Com_Printf ("Dynamic Glow ATI BAD DRIVER HACK %s\n", enablestrings[g_bTextureRectangleHack] );
 
 	if ( r_finish->integer ) {
@@ -1630,16 +1630,16 @@ void RE_SetRangedFog( float dist )
 	}
 }
 
-bool inServer = false;
+//bool inServer = false;
 void RE_SVModelInit( void )
 {
 	tr.numModels = 0;
 	tr.numShaders = 0;
 	tr.numSkins = 0;
 	R_InitImages();
-	inServer = true;
+	//inServer = true;
 	R_InitShaders();
-	inServer = false;
+	//inServer = false;
 	R_ModelInit();
 }
 

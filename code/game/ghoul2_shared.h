@@ -463,7 +463,7 @@ public:
 		}
 		Array().push_back(model);
 	}
-	size_t size() const
+	int size() const
 	{
 		if (!IsValid())
 		{

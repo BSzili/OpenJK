@@ -1777,12 +1777,6 @@ typedef enum {
 } renderCommand_t;
 
 
-// these are sort of arbitrary limits.
-// the limits apply to the sum of all scenes in a frame --
-// the main view, all the 3D icons, etc
-#define	MAX_POLYS		600
-#define	MAX_POLYVERTS	3000
-
 // all of the information needed by the back end must be
 // contained in a backEndData_t.
 typedef struct backEndData_s {
@@ -1826,7 +1820,6 @@ Ghoul2 Insert Start
 void		Multiply_3x4Matrix(mdxaBone_t *out, mdxaBone_t *in2, mdxaBone_t *in);
 extern qboolean R_LoadMDXM (model_t *mod, void *buffer, const char *name, qboolean &bAlreadyCached );
 extern qboolean R_LoadMDXA (model_t *mod, void *buffer, const char *name, qboolean &bAlreadyCached );
-bool LoadTGAPalletteImage ( const char *name, byte **pic, int *width, int *height);
 void		RE_InsertModelIntoHash(const char *name, model_t *mod);
 /*
 Ghoul2 Insert End
