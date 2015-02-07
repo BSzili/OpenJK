@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1215,6 +1214,8 @@ void CL_InitRef( void ) {
 
 //===========================================================================================
 
+void CL_CompleteCinematic( char *args, int argNum );
+
 /*
 ====================
 CL_Init
@@ -1317,6 +1318,7 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("vid_restart", CL_Vid_Restart_f);
 	Cmd_AddCommand ("disconnect", CL_Disconnect_f);
 	Cmd_AddCommand ("cinematic", CL_PlayCinematic_f);
+	Cmd_SetCommandCompletionFunc( "cinematic", CL_CompleteCinematic );
 	Cmd_AddCommand ("ingamecinematic", CL_PlayInGameCinematic_f);
 	Cmd_AddCommand ("uimenu", CL_GenericMenu_f);
 	Cmd_AddCommand ("datapad", CL_DataPad_f);

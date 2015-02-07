@@ -39,6 +39,10 @@ cvar_t	*sv_autoDemo;
 cvar_t	*sv_autoDemoBots;
 cvar_t	*sv_autoDemoMaxMaps;
 cvar_t	*sv_blockJumpSelect;
+cvar_t	*sv_banFile;
+
+serverBan_t serverBans[SERVER_MAXBANS];
+int serverBansCount = 0;
 
 /*
 =============================================================================
@@ -395,7 +399,7 @@ qboolean SVC_RateLimit( leakyBucket_t *bucket, int burst, int period ) {
 		int expired = interval / period;
 		int expiredRemainder = interval % period;
 
-		if ( expired > bucket->burst ) {
+		if ( expired > bucket->burst || interval < 0 ) {
 			bucket->burst = 0;
 			bucket->lastTime = now;
 		} else {

@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,6 +32,17 @@ CONNECTION SCREEN
 char		connectionDialogString[1024];
 char		connectionMessageString[1024];
 
+#ifdef JK2_MODE
+/*
+ =================
+ UI_DrawThumbNail
+ =================
+ */
+void UI_DrawThumbNail( float x, float y, float w, float h, byte *pic )
+{
+	ui.DrawStretchRaw( x, y, w, h, SG_SCR_WIDTH, SG_SCR_HEIGHT, pic, 0, qtrue );
+}
+#endif
 
 /*
 ========================
@@ -52,17 +62,20 @@ void UI_DrawConnect( const char *servername, const char *updateInfoString ) {
 		return;
 	}
 #endif
-
-//	qboolean qValid;
-//	byte *levelPic = ui.SCR_GetScreenshot(&qValid);
+#ifdef JK2_MODE
+	qboolean qValid;
+	byte *levelPic = SCR_GetScreenshot(&qValid);
 	// draw the dialog background
-//	if (!qValid) 
+	if (!qValid)
 	{
 		UI_DrawHandlePic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.menuBackShader );
 	} 
-//	else {
-//		UI_DrawThumbNail(0,SCREEN_HEIGHT, SCREEN_WIDTH, -SCREEN_HEIGHT, levelPic );
-//	}
+	else {
+		UI_DrawThumbNail(0,0, SCREEN_WIDTH, SCREEN_HEIGHT, levelPic );
+	}
+#else
+	UI_DrawHandlePic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.menuBackShader );
+#endif
 }
 
 

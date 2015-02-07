@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,8 +19,8 @@ This file is part of Jedi Academy.
 #ifndef __QCOMMON_H__
 #define __QCOMMON_H__
 
-#include "stringed_ingame.h"
 #include "q_shared.h"
+#include "stringed_ingame.h"
 #include "strippublic.h"
 #include "cm_public.h"
 
@@ -430,6 +429,8 @@ issues.
 ==============================================================
 */
 
+#define	MAX_FILE_HANDLES	64
+
 qboolean FS_Initialized();
 
 void	FS_InitFilesystem (void);
@@ -443,20 +444,31 @@ char	**FS_ListFiles( const char *directory, const char *extension, int *numfiles
 // the returned files will not include any directories or /
 
 void	FS_FreeFileList( char **filelist );
+//rwwRMG - changed to fileList to not conflict with list type
+
+void FS_Remove( const char *osPath );
+void FS_HomeRemove( const char *homePath );
+
+void FS_Rmdir( const char *osPath, qboolean recursive );
+void FS_HomeRmdir( const char *homePath, qboolean recursive );
+
+qboolean FS_FileExists( const char *file );
 
 char   *FS_BuildOSPath( const char *base, const char *game, const char *qpath );
 
 int	FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
+int		FS_GetModList(  char *listbuf, int bufsize );
 
-fileHandle_t FS_FOpenFileWrite( const char *qpath );
+fileHandle_t FS_FOpenFileWrite( const char *qpath, qboolean safe = qtrue );
 // will properly create any needed paths and deal with seperater character issues
 
 fileHandle_t FS_FOpenFileAppend( const char *filename );	// this was present already, but no public proto
 
-qboolean FS_GetExtendedInfo_FOpenFileRead(const char *filename, char **ppsFilename, int *piOffset);
-//return value is success of opening file, then ppsFilename and piOffset are valid
-
-int		FS_FOpenFileRead( const char *qpath, fileHandle_t *file, qboolean uniqueFILE );
+int		FS_filelength( fileHandle_t f );
+fileHandle_t FS_SV_FOpenFileWrite( const char *filename );
+int		FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp );
+void	FS_SV_Rename( const char *from, const char *to, qboolean safe );
+long		FS_FOpenFileRead( const char *qpath, fileHandle_t *file, qboolean uniqueFILE );
 // if uniqueFILE is true, then a new FILE will be fopened even if the file
 // is found in an already open pak file.  If uniqueFILE is false, you must call
 // FS_FCloseFile instead of fclose, otherwise the pak FILE would be improperly closed
@@ -474,7 +486,7 @@ int	FS_Read( void *buffer, int len, fileHandle_t f );
 void	FS_FCloseFile( fileHandle_t f );
 // note: you can't just fclose from another DLL, due to MS libc issues
 
-int		FS_ReadFile( const char *qpath, void **buffer );
+long		FS_ReadFile( const char *qpath, void **buffer );
 // returns the length of the file
 // a null buffer will just return the file length without loading
 // as a quick check for existance. -1 length == not present
@@ -487,6 +499,15 @@ void	FS_ForceFlush( fileHandle_t f );
 
 void	FS_FreeFile( void *buffer );
 // frees the memory returned by FS_ReadFile
+
+class FS_AutoFreeFile {
+private:
+	FS_AutoFreeFile();
+	void *buffer;
+public:
+	FS_AutoFreeFile(void *inbuf) : buffer(inbuf) { };
+	~FS_AutoFreeFile() { if (buffer) FS_FreeFile(buffer); };
+};
 
 void	FS_WriteFile( const char *qpath, const void *buffer, int size );
 // writes a complete file, creating any subdirectories needed
@@ -520,6 +541,7 @@ void		FS_DeleteUserGenFile( const char *filename );
 qboolean	FS_MoveUserGenFile  ( const char *filename_src, const char *filename_dst );
 
 qboolean FS_CheckDirTraversal(const char *checkdir);
+void FS_Rename( const char *from, const char *to );
 
 /*
 ==============================================================
@@ -845,11 +867,14 @@ char **Sys_ListFiles( const char *directory, const char *extension, char *filter
 void	Sys_FreeFileList( char **filelist );
 
 qboolean Sys_LowPhysicalMemory();
-qboolean Sys_FileOutOfDate( const char *psFinalFileName /* dest */, const char *psDataFileName /* src */ );
-qboolean Sys_CopyFile(const char *lpExistingFileName, const char *lpNewFileName, qboolean bOverwrite);
 
 
 byte*	SCR_GetScreenshot(qboolean *qValid);
+#ifdef JK2_MODE
+void	SCR_SetScreenshot(const byte *pbData, int w, int h);
+byte*	SCR_TempRawImage_ReadFromFile(const char *psLocalFilename, int *piWidth, int *piHeight, byte *pbReSampleBuffer, qboolean qbVertFlip);
+void	SCR_TempRawImage_CleanUp();
+#endif
 
 inline int Round(float value)
 {

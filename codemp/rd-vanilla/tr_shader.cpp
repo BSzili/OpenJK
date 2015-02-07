@@ -10,6 +10,10 @@ static	shaderStage_t	stages[MAX_SHADER_STAGES];
 static	shader_t		shader;
 static	texModInfo_t	texMods[MAX_SHADER_STAGES][TR_MAX_TEXMODS];
 
+// Hash value (generated using the generateHashValueForText function) for the original
+// retail JKA shader for gfx/2d/wedge.
+#define RETAIL_ROCKET_WEDGE_SHADER_HASH (1217042)
+
 #define FILE_HASH_SIZE		1024
 static	shader_t*		hashTable[FILE_HASH_SIZE];
 
@@ -82,6 +86,20 @@ static void ClearGlobalShader(void)
 	}
 
 	shader.contentFlags = CONTENTS_SOLID | CONTENTS_OPAQUE;
+}
+
+static uint32_t generateHashValueForText( const char *string, size_t length )
+{
+	int i = 0;
+	uint32_t hash = 0;
+
+	while ( length-- )
+	{
+		hash += string[i] * (i + 119);
+		i++;
+	}
+
+	return (hash ^ (hash >> 10) ^ (hash >> 20));
 }
 
 /*
@@ -1369,6 +1387,8 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 			{
 				vec3_t	color;
 
+				VectorClear( color );
+
 				ParseVector( text, 3, color );
 				stage->constantColor[0] = 255 * color[0];
 				stage->constantColor[1] = 255 * color[1];
@@ -2052,6 +2072,7 @@ will optimize it.
 static qboolean ParseShader( const char **text )
 {
 	char *token;
+	const char *begin = *text;
 	int s;
 
 	s = 0;
@@ -2081,7 +2102,7 @@ static qboolean ParseShader( const char **text )
 		else if ( token[0] == '{' )
 		{
 			if ( s >= MAX_SHADER_STAGES ) {
-				ri->Printf( PRINT_WARNING, "WARNING: too many stages in shader %s\n", shader.name );
+				ri->Printf( PRINT_WARNING, "WARNING: too many stages in shader %s (max is %i)\n", shader.name, MAX_SHADER_STAGES );
 				return qfalse;
 			}
 
@@ -2306,6 +2327,22 @@ static qboolean ParseShader( const char **text )
 	}
 
 	shader.explicitlyDefined = true;
+
+	// The basejka rocket lock wedge shader uses the incorrect blending mode.
+	// It only worked because the shader state was not being set, and relied
+	// on previous state to be multiplied by alpha. Since fixing RB_RotatePic,
+	// the shader needs to be fixed here to render correctly.
+	//
+	// We match against the retail version of gfx/2d/wedge by calculating the
+	// hash value of the shader text, and comparing it against a precalculated
+	// value.
+	uint32_t shaderHash = generateHashValueForText( begin, *text - begin );
+	if ( shaderHash == RETAIL_ROCKET_WEDGE_SHADER_HASH &&
+		Q_stricmp( shader.name, "gfx/2d/wedge" ) == 0 )
+	{
+		stages[0].stateBits &= ~(GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
+		stages[0].stateBits |= GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+	}
 
 	return qtrue;
 }
@@ -3252,6 +3289,51 @@ inline qboolean IsShader(shader_t *sh, const char *name, const int *lightmapInde
 }
 
 /*
+ ===============
+ R_FindLightmap ( needed for -external LMs created by ydnar's q3map2 )
+ given a (potentially erroneous) lightmap index, attempts to load
+ an external lightmap image and/or sets the index to a valid number
+ ===============
+ */
+#define EXTERNAL_LIGHTMAP     "lm_%04d.tga"     // THIS MUST BE IN SYNC WITH Q3MAP2
+static inline const int *R_FindLightmap( const int *lightmapIndex )
+{
+	image_t          *image;
+	char          fileName[ MAX_QPATH ];
+	
+	// don't bother with vertex lighting
+	if( *lightmapIndex < 0 )
+		return lightmapIndex;
+	
+	// does this lightmap already exist?
+	if( *lightmapIndex < tr.numLightmaps && tr.lightmaps[ *lightmapIndex ] != NULL )
+		return lightmapIndex;
+	
+	// bail if no world dir
+	if( tr.worldDir == NULL || !*tr.worldDir )
+	{
+		return lightmapsVertex;
+	}
+	
+	// sync up render thread, because we're going to have to load an image
+	//R_SyncRenderThread();
+	
+	// attempt to load an external lightmap
+	Com_sprintf( fileName, sizeof(fileName), "%s/" EXTERNAL_LIGHTMAP, tr.worldDir, *lightmapIndex );
+	image = R_FindImageFile( fileName, qfalse, qfalse, (qboolean)r_ext_compressed_lightmaps->integer, GL_CLAMP );
+	if( image == NULL )
+	{
+		return lightmapsVertex;
+	}
+	
+	// add it to the lightmap list
+	if( *lightmapIndex >= tr.numLightmaps )
+		tr.numLightmaps = *lightmapIndex + 1;
+	tr.lightmaps[ *lightmapIndex ] = image;
+	return lightmapIndex;
+}
+
+/*
 ===============
 R_FindShader
 
@@ -3294,11 +3376,14 @@ shader_t *R_FindShader( const char *name, const int *lightmapIndex, const byte *
 
 	// use (fullbright) vertex lighting if the bsp file doesn't have
 	// lightmaps
-	if ( lightmapIndex[0] >= 0 && lightmapIndex[0] >= tr.numLightmaps )
+/*	if ( lightmapIndex[0] >= 0 && lightmapIndex[0] >= tr.numLightmaps )
 	{
 		lightmapIndex = lightmapsVertex;
-	}
-	else if ( lightmapIndex[0] < LIGHTMAP_2D )
+	}*/
+	
+	lightmapIndex = R_FindLightmap( lightmapIndex );
+	
+	if ( lightmapIndex[0] < LIGHTMAP_2D )
 	{
 		// negative lightmap indexes cause stray pointers (think tr.lightmaps[lightmapIndex])
 		ri->Printf( PRINT_WARNING, "WARNING: shader '%s' has invalid lightmap index of %d\n", name, lightmapIndex[0] );
@@ -3730,6 +3815,106 @@ void	R_ShaderList_f (void) {
 	ri->Printf( PRINT_ALL,  "------------------\n");
 }
 
+int COM_CompressShader( char *data_p )
+{
+	char *in, *out;
+	int c;
+	qboolean newline = qfalse, whitespace = qfalse;
+
+	in = out = data_p;
+	if ( in )
+	{
+		while ( (c = *in) != 0 )
+		{
+			// skip double slash comments
+			if ( c == '/' && in[1] == '/' )
+			{
+				while ( *in && *in != '\n' )
+				{
+					in++;
+				}
+			}
+			// skip number sign comments
+			else if ( c == '#' )
+			{
+				while ( *in && *in != '\n' )
+				{
+					in++;
+				}
+			}
+			// skip /* */ comments
+			else if ( c == '/' && in[1] == '*' )
+			{
+				while ( *in && (*in != '*' || in[1] != '/') )
+					in++;
+				if ( *in )
+					in += 2;
+			}
+			// record when we hit a newline
+			else if ( c == '\n' || c == '\r' )
+			{
+				newline = qtrue;
+				in++;
+			}
+			// record when we hit whitespace
+			else if ( c == ' ' || c == '\t' )
+			{
+				whitespace = qtrue;
+				in++;
+				// an actual token
+			}
+			else
+			{
+				// if we have a pending newline, emit it (and it counts as whitespace)
+				if ( newline )
+				{
+					*out++ = '\n';
+					newline = qfalse;
+					whitespace = qfalse;
+				} if ( whitespace )
+				{
+					*out++ = ' ';
+					whitespace = qfalse;
+				}
+
+				// copy quoted strings unmolested
+				if ( c == '"' )
+				{
+					*out++ = c;
+					in++;
+					while ( 1 )
+					{
+						c = *in;
+						if ( c && c != '"' )
+						{
+							*out++ = c;
+							in++;
+						}
+						else
+						{
+							break;
+						}
+					}
+					if ( c == '"' )
+					{
+						*out++ = c;
+						in++;
+					}
+				}
+				else
+				{
+					*out = c;
+					out++;
+					in++;
+				}
+			}
+		}
+
+		*out = 0;
+	}
+	return out - data_p;
+}
+
 /*
 ====================
 ScanAndLoadShaderFiles
@@ -3791,6 +3976,14 @@ static void ScanAndLoadShaderFiles( void )
 			Q_strncpyz(shaderName, token, sizeof(shaderName));
 			shaderLine = COM_GetCurrentParseLine();
 
+			if ( token[0] == '#' )
+			{
+				ri->Printf( PRINT_WARNING, "WARNING: Deprecated shader comment \"%s\" on line %d in file %s.  Ignoring line.\n",
+					shaderName, shaderLine, filename );
+				SkipRestOfLine( &p );
+				continue;
+			}
+
 			token = COM_ParseExt(&p, qtrue);
 			if(token[0] != '{' || token[1] != '\0')
 			{
@@ -3838,7 +4031,7 @@ static void ScanAndLoadShaderFiles( void )
 		ri->FS_FreeFile( buffers[i] );
 	}
 
-	COM_Compress( s_shaderText );
+	COM_CompressShader( s_shaderText );
 
 	// free up memory
 	ri->FS_FreeFileList( shaderFiles );
@@ -3852,6 +4045,12 @@ static void ScanAndLoadShaderFiles( void )
 		token = COM_ParseExt( &p, qtrue );
 		if ( token[0] == 0 ) {
 			break;
+		}
+
+		if ( token[0] == '#' )
+		{
+			SkipRestOfLine( &p );
+			continue;
 		}
 
 		hash = generateHashValue(token, MAX_SHADERTEXT_HASH);
@@ -3878,6 +4077,12 @@ static void ScanAndLoadShaderFiles( void )
 		token = COM_ParseExt( &p, qtrue );
 		if ( token[0] == 0 ) {
 			break;
+		}
+
+		if ( token[0] == '#' )
+		{
+			SkipRestOfLine( &p );
+			continue;
 		}
 
 		hash = generateHashValue(token, MAX_SHADERTEXT_HASH);

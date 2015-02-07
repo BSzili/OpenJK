@@ -118,8 +118,7 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		"${SPDir}/qcommon/common.cpp"
 		"${SPDir}/qcommon/cvar.cpp"
 
-		"${SPDir}/qcommon/files_common.cpp"
-		"${SPDir}/qcommon/files_pc.cpp"
+		"${SPDir}/qcommon/files.cpp"
 
 		"${SPDir}/qcommon/md4.cpp"
 		"${SPDir}/qcommon/msg.cpp"
@@ -141,7 +140,6 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		"${SPDir}/qcommon/tags.h"
 		"${SPDir}/qcommon/z_memman_pc.cpp"
 		"${SPDir}/qcommon/qfiles.h"
-		"${SPDir}/qcommon/files.h"
 		"${SPDir}/qcommon/qcommon.h"
 		"${SPDir}/qcommon/stv_version.h"
 		"${SPDir}/qcommon/timing.h"
@@ -355,15 +353,12 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 	endif(UseInternalZlib)
 	
 	# project macro so we can invoke it twice: for jk2 and for ja
-	function(add_sp_project ProjectName Label)
+	function(add_sp_project ProjectName Label SPDirName)
 		if(MakeApplicationBundles)
-			set(MACOSX_BUNDLE_BUNDLE_NAME ${ProjectName} PARENT_SCOPE)
-			set(MACOSX_BUNDLE_DISPLAY_NAME ${ProjectName} PARENT_SCOPE)
-			set(MACOSX_BUNDLE_ICON_FILE OpenJK.icns PARENT_SCOPE)
-			set_source_files_properties(${SPDir}/macosx/OpenJK.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-			set(SPEngineFiles ${SPEngineFiles} ${SPDir}/macosx/OpenJK.icns PARENT_SCOPE)
-			set_source_files_properties(${SPDir}/macosx/English.lproj/InfoPlist.strings PROPERTIES MACOSX_PACKAGE_LOCATION Resources/English.lproj)
-			set(SPEngineFiles ${SPEngineFiles} ${SPDir}/macosx/English.lproj/InfoPlist.strings PARENT_SCOPE)
+			set_source_files_properties(${SPDirName}/macosx/OpenJK.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+			set(SPEngineFiles ${SPEngineFiles} ${SPDirName}/macosx/OpenJK.icns)
+			set_source_files_properties(${SPDirName}/macosx/English.lproj/InfoPlist.strings PROPERTIES MACOSX_PACKAGE_LOCATION Resources/English.lproj)
+			set(SPEngineFiles ${SPEngineFiles} ${SPDirName}/macosx/English.lproj/InfoPlist.strings)
 		endif(MakeApplicationBundles)
 
 		if(WIN32)
@@ -371,7 +366,7 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		else(WIN32)
 			if(MakeApplicationBundles)
 				add_executable(${ProjectName} MACOSX_BUNDLE ${SPEngineFiles})
-				set_target_properties(${ProjectName} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${SPDir}/macosx/OpenJKInfo.plist")
+				set_target_properties(${ProjectName} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${SPDirName}/macosx/OpenJKInfo.plist")
 			else(MakeApplicationBundles)
 				add_executable(${ProjectName} ${SPEngineFiles})
 			endif(MakeApplicationBundles)
@@ -394,11 +389,11 @@ if(BuildSPEngine OR BuildJK2SPEngine)
 		endif(SPEngineLibraries)
 	endfunction(add_sp_project)
 	if(BuildSPEngine)
-		add_sp_project(${SPEngine} "SP Client")
+		add_sp_project(${SPEngine} "SP Client" ${SPDir})
 	endif(BuildSPEngine)
 	if(BuildJK2SPEngine)
 		set(SPEngineDefines ${SPEngineDefines} "JK2_MODE")
-		add_sp_project(${JK2SPEngine} "JK2 SP Client")
+		add_sp_project(${JK2SPEngine} "JK2 SP Client" ${JK2SPDir})
 	endif(BuildJK2SPEngine)
 
 endif(BuildSPEngine OR BuildJK2SPEngine)

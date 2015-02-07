@@ -16,6 +16,7 @@
 // in entityStates (level eType), so the game must explicitly flag
 // special server behaviors
 #define	SVF_NOCLIENT			0x00000001	// don't send entity to clients, even if it has effects
+#define SVF_BROADCASTCLIENTS	0x00000002	// only broadcast to clients specified in r.broadcastClients[clientNum/32]
 #define SVF_BOT					0x00000008	// set if the entity is a bot
 #define SVF_PLAYER_USABLE		0x00000010	// player can use this with the use button
 #define	SVF_BROADCAST			0x00000020	// send to all connected clients
@@ -88,11 +89,10 @@ typedef struct entityShared_s {
 	// entity[ent->s.ownerNum].ownerNum = passEntityNum	(don't interact with other missiles from owner)
 	int			ownerNum;
 
-	// mask of clients that this entity should be broadcast too.  The first 32 clients
-	// are represented by the first array index and the latter 32 clients are represented
-	// by the second array index.
-	int			broadcastClients[2];
-
+	// mask of clients that this entity should be broadcast to
+	// the first 32 clients are represented by the first array index and the latter 32 clients are represented by the
+	//	second array index.
+	uint32_t	broadcastClients[2];
 } entityShared_t;
 
 //bstate.h

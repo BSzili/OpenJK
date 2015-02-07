@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -239,6 +238,9 @@ do the apropriate things.
 =============
 */
 void SG_Shutdown();
+#ifdef JK2_MODE
+extern void SCR_UnprecacheScreenshot();
+#endif
 void QDECL Com_Error( int code, const char *fmt, ... ) {
 	va_list		argptr;
 	static int	lastErrorTime;
@@ -267,6 +269,10 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	}
 	lastErrorTime = currentTime;
 
+#ifdef JK2_MODE
+	SCR_UnprecacheScreenshot();
+#endif
+	
 	va_start (argptr,fmt);
 	Q_vsnprintf (com_errorMessage, sizeof(com_errorMessage), fmt, argptr);
 	va_end (argptr);	
@@ -846,7 +852,7 @@ int Com_EventLoop( void ) {
 
 		switch ( ev.evType ) {
 		default:
-			Com_Error( ERR_FATAL, "Com_EventLoop: bad event type %i", ev.evTime );
+			Com_Error( ERR_FATAL, "Com_EventLoop: bad event type %i", ev.evType );
 			break;
         case SE_NONE:
             break;

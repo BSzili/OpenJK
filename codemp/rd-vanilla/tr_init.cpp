@@ -1487,7 +1487,8 @@ void RE_GetLightStyle(int style, color4ub_t color)
 		return;
 	}
 
-	*(int *)color = *(int *)styleColors[style];
+	byteAlias_t *baDest = (byteAlias_t *)&color, *baSource = (byteAlias_t *)&styleColors[style];
+	baDest->i = baSource->i;
 }
 
 void RE_SetLightStyle(int style, int color)
@@ -1498,9 +1499,9 @@ void RE_SetLightStyle(int style, int color)
 		return;
 	}
 
-	if (*(int*)styleColors[style] != color)
-	{
-		*(int *)styleColors[style] = color;
+	byteAlias_t *ba = (byteAlias_t *)&styleColors[style];
+	if ( ba->i != color) {
+		ba->i = color;
 	}
 }
 

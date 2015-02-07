@@ -385,7 +385,7 @@ qboolean PC_Float_Parse(int handle, float *f) {
 		negative = qtrue;
 	}
 	if (token.type != TT_NUMBER) {
-		PC_SourceError(handle, "expected float but found %s\n", token.string);
+		PC_SourceError(handle, "expected float but found %s", token.string);
 		return qfalse;
 	}
 	if (negative)
@@ -465,7 +465,7 @@ qboolean PC_Int_Parse(int handle, int *i) {
 		negative = qtrue;
 	}
 	if (token.type != TT_NUMBER) {
-		PC_SourceError(handle, "expected integer but found %s\n", token.string);
+		PC_SourceError(handle, "expected integer but found %s", token.string);
 		return qfalse;
 	}
 	*i = token.intvalue;
@@ -1167,7 +1167,7 @@ qboolean Script_SetItemColorCvar(itemDef_t *item, char **args)
 	char	*colorCvarName,*holdBuf,*holdVal;
 	char cvarBuf[1024];
 	const char *name;
-	vec4_t color;
+	vec4_t color = { 0.0f };
 	int i;
 	vec4_t *out;
 
@@ -1897,8 +1897,7 @@ transition3		lfvscr		(min extent) (max extent) (fovx,y)  20 25
 */
 qboolean Script_Transition3(itemDef_t *item, char **args)
 {
-	const char *name;
-	const char *value;
+	const char *name = NULL, *value = NULL;
 	float minx, miny, minz, maxx, maxy, maxz, fovtx, fovty;
 	int time;
 	float amt;
@@ -1956,7 +1955,9 @@ qboolean Script_Transition3(itemDef_t *item, char **args)
 			}
 		}
 	}
-	Com_Printf(S_COLOR_YELLOW"WARNING: Script_Transition2: error parsing '%s'\n", name );
+	if ( name ) {
+		Com_Printf( S_COLOR_YELLOW "WARNING: Script_Transition2: error parsing '%s'\n", name );
+	}
 	return qtrue;
 }
 #endif
@@ -2437,7 +2438,8 @@ qboolean Item_TextScroll_HandleKey ( itemDef_t *item, int key, qboolean down, qb
 
 		if ( key == A_MWHEELUP )
 		{
-			scrollPtr->startPos--;
+			int count = trap->Key_IsDown( A_CTRL ) ? 5 : 1;
+			scrollPtr->startPos -= count;
 			if (scrollPtr->startPos < 0)
 			{
 				scrollPtr->startPos = 0;
@@ -2449,7 +2451,8 @@ qboolean Item_TextScroll_HandleKey ( itemDef_t *item, int key, qboolean down, qb
 		}
 		if ( key == A_MWHEELDOWN )
 		{
-			scrollPtr->startPos++;
+			int count = trap->Key_IsDown( A_CTRL ) ? 5 : 1;
+			scrollPtr->startPos += count;
 			if (scrollPtr->startPos > max)
 			{
 				scrollPtr->startPos = max;
@@ -3119,7 +3122,8 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down, qboolea
 
 			if ( key == A_MWHEELUP )
 			{
-				listPtr->startPos -= ((int)item->special == FEEDER_Q3HEADS) ? viewmax : 1;
+				int count = trap->Key_IsDown( A_CTRL ) ? 5 : 1;
+				listPtr->startPos -= ((int)item->special == FEEDER_Q3HEADS) ? viewmax : count;
 				if (listPtr->startPos < 0)
 				{
 					listPtr->startPos = 0;
@@ -3131,7 +3135,8 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down, qboolea
 			}
 			if ( key == A_MWHEELDOWN )
 			{
-				listPtr->startPos += ((int)item->special == FEEDER_Q3HEADS) ? viewmax : 1;
+				int count = trap->Key_IsDown( A_CTRL ) ? 5 : 1;
+				listPtr->startPos += ((int)item->special == FEEDER_Q3HEADS) ? viewmax : count;
 				if (listPtr->startPos > max)
 				{
 					listPtr->startPos = max;
@@ -5897,7 +5902,7 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 
 		if ( item->cvarFlags & (CVAR_ENABLE | CVAR_DISABLE) && !Item_EnableShowViaCvar( item, CVAR_ENABLE ) )
 			memcpy( color, parent->disableColor, sizeof( vec4_t ) );
-	
+
 		if (item->text) {
 			Item_Text_Paint(item);
 				if (item->text[0]) {
@@ -7462,7 +7467,7 @@ qboolean ItemParse_flag( itemDef_t *item, int handle)
 
 	if (itemFlags[i].string == NULL)
 	{
-		Com_Printf( S_COLOR_YELLOW "Unknown item style value '%s'", token.string );
+		Com_Printf( S_COLOR_YELLOW "Unknown item style value '%s'\n", token.string );
 	}
 
 	return qtrue;
@@ -7478,7 +7483,7 @@ qboolean ItemParse_style( itemDef_t *item, int handle)
 {
 	if (!PC_Int_Parse(handle, &item->window.style))
 	{
-		Com_Printf(S_COLOR_YELLOW "Unknown item style value");
+		Com_Printf(S_COLOR_YELLOW "Unknown item style value\n");
 		return qfalse;
 	}
 
@@ -7706,7 +7711,7 @@ qboolean ItemParse_textalign( itemDef_t *item, int handle )
 {
 	if (!PC_Int_Parse(handle, &item->textalignment))
 	{
-		Com_Printf(S_COLOR_YELLOW "Unknown text alignment value");
+		Com_Printf(S_COLOR_YELLOW "Unknown text alignment value\n");
 
 		return qfalse;
 	}
@@ -8086,7 +8091,7 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 
 		if (!PC_String_Parse(handle, (const char **)&psString))
 		{
-			PC_SourceError(handle, "end of file inside menu item\n");
+			PC_SourceError(handle, "end of file inside menu item");
 			return qfalse;
 		}
 
@@ -8148,7 +8153,7 @@ qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle )
 
 		if ( !PC_String_Parse ( handle, (const char **)&string ) )
 		{
-			PC_SourceError(handle, "end of file inside menu item\n");
+			PC_SourceError(handle, "end of file inside menu item");
 			return qfalse;
 		}
 
@@ -8437,7 +8442,7 @@ qboolean Item_Parse(int handle, itemDef_t *item) {
 	}
 	while ( 1 ) {
 		if (!trap->PC_ReadToken(handle, &token)) {
-			PC_SourceError(handle, "end of file inside menu item\n");
+			PC_SourceError(handle, "end of file inside menu item");
 			return qfalse;
 		}
 
@@ -8755,7 +8760,7 @@ qboolean MenuParse_style( itemDef_t *item, int handle)
 
 	if (!PC_Int_Parse(handle, &menu->window.style))
 	{
-		Com_Printf(S_COLOR_YELLOW "Unknown menu style value");
+		Com_Printf(S_COLOR_YELLOW "Unknown menu style value\n");
 		return qfalse;
 	}
 
@@ -8859,7 +8864,7 @@ qboolean MenuParse_descAlignment( itemDef_t *item, int handle )
 
 	if (!PC_Int_Parse(handle, &menu->descAlignment))
 	{
-		Com_Printf(S_COLOR_YELLOW "Unknown desc alignment value");
+		Com_Printf(S_COLOR_YELLOW "Unknown desc alignment value\n");
 		return qfalse;
 	}
 
@@ -9203,7 +9208,7 @@ qboolean Menu_Parse(int handle, menuDef_t *menu) {
 
 	while ( 1 ) {
 		if (!trap->PC_ReadToken(handle, &token)) {
-			PC_SourceError(handle, "end of file inside menu\n");
+			PC_SourceError(handle, "end of file inside menu");
 			return qfalse;
 		}
 

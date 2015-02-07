@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -56,7 +55,7 @@ typedef struct {
 	int 		(*FS_Write)( const void *buffer, int len, fileHandle_t f );
 	void		(*FS_FCloseFile)( fileHandle_t f );
 	int			(*FS_GetFileList)(  const char *path, const char *extension, char *listbuf, int bufsize );
-	int			(*FS_ReadFile)( const char *name, void **buf );
+	long		(*FS_ReadFile)( const char *name, void **buf );
 	void		(*FS_FreeFile)( void *buf );
 
 	// =========== renderer function calls ================
@@ -91,6 +90,11 @@ typedef struct {
 
 	// force a screen update, only used during gamestate load
 	void		(*UpdateScreen)( void );
+	
+#ifdef JK2_MODE
+	// stuff for savegame screenshots...
+	void		(*PrecacheScreenshot)( void );
+#endif
 
 	//========= model collision ===============
 
@@ -108,7 +112,9 @@ typedef struct {
 
 	// =========== getting save game picture ===============
 	void	(*DrawStretchRaw) (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);
-	//qboolean(*SG_GetSaveImage)( const char *psPathlessBaseName, void *pvAddress );
+#ifdef JK2_MODE
+	qboolean(*SG_GetSaveImage)( const char *psPathlessBaseName, void *pvAddress );
+#endif
 	int		(*SG_GetSaveGameComment)(const char *psPathlessBaseName, char *sComment, char *sMapName);
 	qboolean (*SG_GameAllowedToSaveHere)(qboolean inCamera);
 	void (*SG_StoreSaveGameComment)(const char *sComment);

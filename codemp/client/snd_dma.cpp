@@ -17,6 +17,7 @@ qboolean s_shutUp = qfalse;
 static void S_Play_f(void);
 static void S_SoundList_f(void);
 static void S_Music_f(void);
+static void S_StopMusic_f(void);
 static void S_SetDynamicMusic_f(void);
 
 void S_Update_();
@@ -362,10 +363,6 @@ void S_SoundInfo_f(void) {
 	if (!s_soundStarted) {
 		Com_Printf ("sound system not started\n");
 	} else {
-		if ( s_soundMuted ) {
-			Com_Printf ("sound system is muted\n");
-		}
-
 #ifdef USE_OPENAL
 		if (s_UseOpenAL)
 		{
@@ -462,6 +459,7 @@ void S_Init( void ) {
 
 	Cmd_AddCommand("play", S_Play_f);
 	Cmd_AddCommand("music", S_Music_f);
+	Cmd_AddCommand("stopmusic", S_StopMusic_f);
 	Cmd_AddCommand("soundlist", S_SoundList_f);
 	Cmd_AddCommand("soundinfo", S_SoundInfo_f);
 	Cmd_AddCommand("soundstop", S_StopAllSounds);
@@ -707,6 +705,7 @@ void S_Shutdown( void )
 
 	Cmd_RemoveCommand("play");
 	Cmd_RemoveCommand("music");
+	Cmd_RemoveCommand("stopmusic");
 	Cmd_RemoveCommand("stopsound");
 	Cmd_RemoveCommand("soundlist");
 	Cmd_RemoveCommand("soundinfo");
@@ -2121,7 +2120,7 @@ S_RawSamples
 Music streaming
 ============
 */
-void S_RawSamples( int samples, int rate, int width, int s_channels, const byte *data, float volume, int bFirstOrOnlyUpdateThisFrame )
+void S_RawSamples( int samples, int rate, int width, int channels, const byte *data, float volume, int bFirstOrOnlyUpdateThisFrame )
 {
 	int		i;
 	int		src, dst;
@@ -2142,7 +2141,7 @@ void S_RawSamples( int samples, int rate, int width, int s_channels, const byte 
 	scale = (float)rate / dma.speed;
 
 //Com_Printf ("%i < %i < %i\n", s_soundtime, s_paintedtime, s_rawend);
-	if (s_channels == 2 && width == 2)
+	if (channels == 2 && width == 2)
 	{
 		if (scale == 1.0)
 		{	// optimized case
@@ -2197,7 +2196,7 @@ void S_RawSamples( int samples, int rate, int width, int s_channels, const byte 
 			}
 		}
 	}
-	else if (s_channels == 1 && width == 2)
+	else if (channels == 1 && width == 2)
 	{
 		if (bFirstOrOnlyUpdateThisFrame)
 		{
@@ -2226,7 +2225,7 @@ void S_RawSamples( int samples, int rate, int width, int s_channels, const byte 
 			}
 		}
 	}
-	else if (s_channels == 2 && width == 1)
+	else if (channels == 2 && width == 1)
 	{
 		intVolume *= 256;
 
@@ -2257,7 +2256,7 @@ void S_RawSamples( int samples, int rate, int width, int s_channels, const byte 
 			}
 		}
 	}
-	else if (s_channels == 1 && width == 1)
+	else if (channels == 1 && width == 1)
 	{
 		intVolume *= 256;
 
@@ -3717,6 +3716,10 @@ static void S_Music_f( void ) {
 	}
 }
 
+static void S_StopMusic_f( void ) {
+	S_StopBackgroundTrack();
+}
+
 // a debug function, but no harm to leave in...
 //
 static void S_SetDynamicMusic_f(void)
@@ -4697,6 +4700,11 @@ static qboolean S_UpdateBackgroundTrack_Actual( MusicInfo_t *pMusicInfo, qboolea
 
 		// decide how much data needs to be read from the file
 		fileSamples = bufferSamples * pMusicInfo->s_backgroundInfo.rate / dma.speed;
+
+		// don't try to play if there are no more samples in the file
+		if (!fileSamples) {
+			return qfalse;
+		}
 
 		// don't try and read past the end of the file
 		if ( fileSamples > pMusicInfo->s_backgroundSamples ) {

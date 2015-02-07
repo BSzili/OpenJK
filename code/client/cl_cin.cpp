@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1861,7 +1860,7 @@ static void PlayCinematic(const char *arg, const char *s, qboolean qbInGame)
 		{
 			psAudioFile = "music/cinematic_1";
 #ifdef JK2_MODE
-			hCrawl = re.RegisterShaderNoMip( va("menu/video/tc_%d", sp_language->string) );
+			hCrawl = re.RegisterShaderNoMip( va("menu/video/tc_%d", sp_language->integer) );
 			if(!hCrawl)
 			{
 				// failed, so go back to english
@@ -1953,6 +1952,15 @@ qboolean CL_CheckPendingCinematic(void)
 	return qfalse;
 }
 
+/*
+==================
+CL_CompleteCinematic
+==================
+*/
+void CL_CompleteCinematic( char *args, int argNum ) {
+	if ( argNum == 2 )
+		Field_CompleteFilename( "video", "roq", qtrue, qfalse );
+}
 
 void CL_PlayCinematic_f(void) 
 {

@@ -2,9 +2,8 @@
 This file is part of Jedi Academy.
 
     Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
     Jedi Academy is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -226,7 +225,9 @@ static void SV_MapTransition_f(void)
 {		
 	const char	*spawntarget;
 
-//	SCR_PrecacheScreenshot();
+#ifdef JK2_MODE
+	SCR_PrecacheScreenshot();
+#endif
 	SV_Player_EndOfLevelSave();
 
 	spawntarget = Cmd_Argv(2);
@@ -250,13 +251,18 @@ Restart the server on a different map, but clears a cvar so that typing "map bla
 player weapons/ammo/etc from the previous level that you haven't really exited (ie ignores KEEP_PREV on spawn points)
 ==================
 */
+#ifdef JK2_MODE
+extern void SCR_UnprecacheScreenshot();
+#endif
 static void SV_Map_f( void ) 
 {
 	Cvar_Set( sCVARNAME_PLAYERSAVE, "");
 	Cvar_Set( "spawntarget", "" );
 	Cvar_Set("tier_storyinfo", "0");
 	Cvar_Set("tiers_complete", "");
-//	SCR_UnprecacheScreenshot();
+#ifdef JK2_MODE
+	SCR_UnprecacheScreenshot();
+#endif
 
 	ForceReload_e eForceReload = eForceReload_NOTHING;	// default for normal load
 
@@ -304,7 +310,9 @@ void SV_LoadTransition_f(void)
 
 	qbLoadTransition = qtrue;
 
-//	SCR_PrecacheScreenshot();
+#ifdef JK2_MODE
+	SCR_PrecacheScreenshot();
+#endif
 	SV_Player_EndOfLevelSave();
 
 	//Save the full current state of the current map so we can return to it later
