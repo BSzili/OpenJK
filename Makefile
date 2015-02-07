@@ -399,8 +399,7 @@ CLIENT_SP_OBJS_ = \
 	code/qcommon/cmd.o \
 	code/qcommon/common.o \
 	code/qcommon/cvar.o \
-	code/qcommon/files_common.o \
-	code/qcommon/files_pc.o \
+	code/qcommon/files.o \
 	code/qcommon/matcomp.o \
 	code/qcommon/md4.o \
 	code/qcommon/msg.o \
@@ -425,7 +424,6 @@ CLIENT_SP_OBJS_ = \
 	code/sys/sys_unix.o \
 	code/ui/ui_atoms.o \
 	code/ui/ui_connect.o \
-	code/ui/ui_debug.o \
 	code/ui/ui_main.o \
 	code/ui/ui_saber.o \
 	code/ui/ui_shared.o \
@@ -441,12 +439,12 @@ CLIENT_SP_OBJS_ = \
 	code/rd-vanilla/G2_bones.o \
 	code/rd-vanilla/G2_misc.o \
 	code/rd-vanilla/G2_surfaces.o \
+	code/rd-vanilla/tr_arb.o \
 	code/rd-vanilla/tr_backend.o \
 	code/rd-vanilla/tr_bsp.o \
 	code/rd-vanilla/tr_cmds.o \
 	code/rd-vanilla/tr_curve.o \
 	code/rd-vanilla/tr_draw.o \
-	code/rd-vanilla/tr_flares.o \
 	code/rd-vanilla/tr_ghoul2.o \
 	code/rd-vanilla/tr_image.o \
 	code/rd-vanilla/tr_init.o \
@@ -461,6 +459,7 @@ CLIENT_SP_OBJS_ = \
 	code/rd-vanilla/tr_shader.o \
 	code/rd-vanilla/tr_shade_calc.o \
 	code/rd-vanilla/tr_shadows.o \
+	code/rd-vanilla/tr_skin.o \
 	code/rd-vanilla/tr_sky.o \
 	code/rd-vanilla/tr_stl.o \
 	code/rd-vanilla/tr_surface.o \
