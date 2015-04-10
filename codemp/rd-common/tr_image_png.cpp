@@ -1,9 +1,5 @@
 #include "tr_common.h"
-#if defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos4__)
-#include "libpng/png.h"
-#else
 #include <png.h>
-#endif
 
 void user_write_data( png_structp png_ptr, png_bytep data, png_size_t length ) {
 	fileHandle_t fp = *(fileHandle_t*)png_get_io_ptr( png_ptr );
