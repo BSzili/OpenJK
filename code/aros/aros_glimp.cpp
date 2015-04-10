@@ -55,15 +55,10 @@ static struct Screen *screen = NULL;
 #ifdef __AROS__
 static AROSMesaContext context = NULL;
 #define qwglGetProcAddress(x) AROSMesaGetProcAddress((GLubyte*)x)
-#else
-#ifdef __amigaos4__
+#elif defined(__amigaos4__)
 struct GLContextIFace *context = NULL;
-#define stub_glMultiTexCoord2fARB glMultiTexCoord2fARB
-#define stub_glActiveTextureARB glActiveTextureARB
-#define stub_glClientActiveTextureARB glClientActiveTextureARB
-#define stub_glLockArraysEXT glLockArraysEXT
-#define stub_glUnlockArraysEXT glUnlockArraysEXT
-#else
+#define qwglGetProcAddress(x) mglGetProcAddress(x)
+#else // __MORPHOS__
 GLContext *__tglContext = NULL;
 static int context = 0;
 
@@ -91,7 +86,6 @@ static void stub_glUnlockArraysEXT()
 {
 	glUnlockArraysEXT();
 }
-#endif
 
 void *qwglGetProcAddress(char *symbol)
 {
@@ -144,8 +138,9 @@ bool GL_CheckForExtension(const char *ext)
 	const char *ptr = Q_stristr( glConfig.extensions_string, ext );
 	if (ptr == NULL)
 		return false;
-	ptr += strlen(ext);
-	return ((*ptr == ' ') || (*ptr == '\0'));  // verify it's complete string.
+	//ptr += strlen(ext);
+	//return ((*ptr == ' ') || (*ptr == '\0'));  // verify it's complete string.
+	return true;
 }
 
 extern bool g_bDynamicGlowSupported;
@@ -288,11 +283,7 @@ static void GLimp_InitExtensions( void )
 	}
 
 	// GL_EXT_compiled_vertex_array
-#ifdef __amigaos4__
-	if ( GL_CheckForExtension( "GL_EXT_compiled_vertex_arrays" ) )
-#else
 	if ( GL_CheckForExtension( "GL_EXT_compiled_vertex_array" ) )
-#endif
 	{
 		if ( r_ext_compiled_vertex_array->value )
 		{
