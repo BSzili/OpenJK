@@ -41,8 +41,8 @@ build/client_jasp/%.o: %.cpp
 	$(MKDIR) $(@D)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-openjk_sp: CFLAGS += -D_JK2EXE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
-openjk_sp: CXXFLAGS += -D_JK2EXE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjk_sp: CFLAGS += -D_JK2EXE -DUSE_INTERNAL_JPEG -Ilib/libpng -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjk_sp: CXXFLAGS += -D_JK2EXE -DUSE_INTERNAL_JPEG -Ilib/libpng -Icode/rd-vanilla -Icode/aros -Icode -Ilib
 openjk_sp: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
@@ -102,8 +102,8 @@ build/client_jamp/%.o: %.c
 	$(MKDIR) $(@D)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-openjk_mp: CFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
-openjk_mp: CXXFLAGS += -DBOTLIB -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
+openjk_mp: CFLAGS += -DBOTLIB -DUSE_INTERNAL_JPEG -Ilib/libpng -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
+openjk_mp: CXXFLAGS += -DBOTLIB -DUSE_INTERNAL_JPEG -Ilib/libpng -Icodemp/rd-vanilla -Icode/aros -Icodemp -Ilib
 openjk_mp: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
@@ -209,8 +209,8 @@ build/client_josp/%.o: %.cpp
 	$(MKDIR) $(@D)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-openjo_sp: CFLAGS += -D_JK2EXE -DJK2_MODE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
-openjo_sp: CXXFLAGS += -D_JK2EXE -DJK2_MODE -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjo_sp: CFLAGS += -D_JK2EXE -DJK2_MODE -DUSE_INTERNAL_JPEG -Ilib/libpng -Icode/rd-vanilla -Icode/aros -Icode -Ilib
+openjo_sp: CXXFLAGS += -D_JK2EXE -DJK2_MODE -DUSE_INTERNAL_JPEG -Ilib/libpng -Icode/rd-vanilla -Icode/aros -Icode -Ilib
 openjo_sp: LDFLAGS += -lGL
 
 ifeq ($(OSTYPE), AmigaOS)
